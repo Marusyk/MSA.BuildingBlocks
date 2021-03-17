@@ -2,6 +2,7 @@
 
 MSA.BuildingBlocks will include the following packages:
  - MSA.BuildingBlocks.EventBus - infrastructure for work with messaging-broker infrastructure technology like Azure Service Bus, RabbitMQ and Kafka
+ - MSA.BuildingBlocks.RequestReplyBus - infrastructure for work with messaging-broker infrastructure technology like Azure Service Bus, RabbitMQ and Kafka
  - MSA.BuildingBlocks.FileStorage - infrastructure for work with file storage (Azure Blob storage, Azure DataLake, Amazon S3)
  - MSA.BuildingBlocks.Logging - contains common logging infrastructure that using Serilog with Elasticsearch format and Application Insight sink
  - MSA.BuildingBlocks.Metrics - prometheus metrics extensions
