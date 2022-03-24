@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>AutoMapper.Extensions.MappingProfile</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>MSA.BuildingBlocks.Mapping</PackageId>
+    <Authors>RMarusyk</Authors>
+    <Description>Extensions and interfaces IMapTo and IMapFrom for AutoMapper</Description>
+    <PackageProjectUrl>https://github.com/Marusyk/MSA.BuildingBlocks</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Marusyk/MSA.BuildingBlocks</RepositoryUrl>
+    <PackageTags>autpmapper;mapping;c-sharp-library</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Version>0.0.1</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="11.0.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+  </ItemGroup>
+
+</Project>
