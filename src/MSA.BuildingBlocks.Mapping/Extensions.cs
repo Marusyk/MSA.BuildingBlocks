@@ -1,13 +1,19 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace AutoMapper.Extensions.MappingProfile;
-
-public static class Extensions
+namespace AutoMapper.Extensions.MappingProfile
 {
-    public static IServiceCollection AddMappingProfiles(this IServiceCollection services)
+    public static class Extensions
     {
-        ArgumentNullException.ThrowIfNull(services);
-        services.AddAutoMapper(typeof(MappingProfile).Assembly);
-        return services;
+        public static IServiceCollection AddMappingProfiles(this IServiceCollection services)
+        {
+            if (services is null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+
+            services.AddAutoMapper(typeof(MappingProfile).Assembly);
+            return services;
+        }
     }
 }

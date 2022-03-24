@@ -1,6 +1,7 @@
-﻿namespace AutoMapper.Extensions.MappingProfile;
-
-public interface IMapTo<T>
+﻿namespace AutoMapper.Extensions.MappingProfile
 {
-    void MapTo(Profile profile) => profile.CreateMap(GetType(), typeof(T));
+    public interface IMapTo<T>
+    {
+        void MapTo(Profile profile) => profile.CreateMap(GetType(), typeof(T));
+    }
 }
