@@ -6,11 +6,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="MSA.BuildingBlocks.Mapping" Version="0.1.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\MSA.BuildingBlocks.Mapping\MSA.BuildingBlocks.Mapping.csproj" />
     </ItemGroup>
 
 </Project>
