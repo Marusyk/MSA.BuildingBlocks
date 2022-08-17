@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32210.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSA.BuildingBlocks.Mapping", "MSA.BuildingBlocks.Mapping\MSA.BuildingBlocks.Mapping.csproj", "{6CCC9DCF-6F45-427D-94DA-7585F28A7D67}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSA.BuildingBlocks.Mapping", "MSA.BuildingBlocks.Mapping\MSA.BuildingBlocks.Mapping.csproj", "{6CCC9DCF-6F45-427D-94DA-7585F28A7D67}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication", "WebApplication\WebApplication.csproj", "{B60C629F-0623-489A-AB34-4CC48001FB92}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication", "WebApplication\WebApplication.csproj", "{B60C629F-0623-489A-AB34-4CC48001FB92}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSA.BuildingBlocks.ServiceClient", "MSA.BuildingBlocks.ServiceClient\MSA.BuildingBlocks.ServiceClient.csproj", "{7FDC86EA-39C9-4DD2-AEED-7A7F5EDBDB01}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{B60C629F-0623-489A-AB34-4CC48001FB92}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B60C629F-0623-489A-AB34-4CC48001FB92}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B60C629F-0623-489A-AB34-4CC48001FB92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FDC86EA-39C9-4DD2-AEED-7A7F5EDBDB01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FDC86EA-39C9-4DD2-AEED-7A7F5EDBDB01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FDC86EA-39C9-4DD2-AEED-7A7F5EDBDB01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FDC86EA-39C9-4DD2-AEED-7A7F5EDBDB01}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

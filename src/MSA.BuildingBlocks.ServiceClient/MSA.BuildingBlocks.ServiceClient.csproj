@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <RootNamespace>MSA.BuildingBlocks.ServiceClient</RootNamespace>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <PackageId>MSA.BuildingBlocks.ServiceClient</PackageId>
+        <Authors>RMarusyk</Authors>
+        <Description>Infrastructure for internal communication between services by HTTP protocol</Description>
+        <License>https://github.com/Marusyk/MSA.BuildingBlocks/blob/main/LICENSE</License>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageIcon>block.png</PackageIcon>
+        <PackageProjectUrl>https://github.com/Marusyk/MSA.BuildingBlocks</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Marusyk/MSA.BuildingBlocks</RepositoryUrl>
+        <PackageTags>autpmapper;mapping;c-sharp-library</PackageTags>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Version>0.1.0</Version>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\..\block.png" Pack="true" Visible="false" PackagePath="\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Flurl" Version="3.0.6" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
+    </ItemGroup>
+
+</Project>
