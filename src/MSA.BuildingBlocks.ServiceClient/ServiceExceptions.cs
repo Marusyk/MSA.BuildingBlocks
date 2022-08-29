@@ -1,27 +1,4 @@
-﻿using System.Net;
-
-namespace MSA.BuildingBlocks.ServiceClient;
-
-public sealed class InternalServiceException : Exception
-{
-    public InternalServiceException(string requestId, HttpMethod httpMethod, Uri requestUri, HttpStatusCode statusCode, string content)
-        : base($"Internal service exception {statusCode} {httpMethod} {requestUri}; RequestId: {requestId}.")
-    {
-        RequestId = requestId;
-        DateTime = DateTime.UtcNow;
-        HttpMethod = httpMethod;
-        RequestUri = requestUri;
-        StatusCode = (int)statusCode;
-        Content = content;
-    }
-
-    public string RequestId { get; }
-    public DateTime DateTime { get; }
-    public HttpMethod HttpMethod { get; }
-    public Uri RequestUri { get; }
-    public int StatusCode { get; }
-    public string Content { get; }
-}
+﻿namespace MSA.BuildingBlocks.ServiceClient;
 
 public sealed class UnhandledServiceException : Exception
 {

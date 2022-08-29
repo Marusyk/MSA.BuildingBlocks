@@ -1,46 +1,38 @@
-﻿namespace MSA.BuildingBlocks.ServiceClient;
+﻿using System.Text.Json.Serialization;
 
-public class ServiceResponse<TResponse> : ServiceResponse
+namespace MSA.BuildingBlocks.ServiceClient;
+
+public record ServiceResponse<TResponse>(TResponse Payload, int StatusCode, string TraceId, IReadOnlyCollection<Error> Errors = default) : ServiceResponse(StatusCode, TraceId, Errors);
+
+public record ServiceResponse(int StatusCode, string TraceId, IReadOnlyCollection<Error> Errors = default)
 {
-    public ServiceResponse(TResponse data, int statusCode, ErrorResponse validationErrors = null)
-        : base(statusCode, validationErrors)
-    {
-        Data = data;
-    }
-
-    public TResponse Data { get; }
-}
-
-public class ServiceResponse
-{
-    public ServiceResponse(int statusCode)
-    {
-        StatusCode = statusCode;
-    }
-
-    public ServiceResponse(int statusCode, ErrorResponse validationErrors)
-        : this(statusCode)
-    {
-        ValidationErrors = validationErrors;
-    }
-
-    public int StatusCode { get; }
-    public ErrorResponse ValidationErrors { get; }
     public bool IsSuccess => StatusCode is >= 200 and < 300;
 }
 
-public class ErrorResponse
+internal record ErrorResponse
 {
     private readonly List<Error> _errors;
 
-    public ErrorResponse(string traceId, IEnumerable<Error> errors)
+    [JsonConstructor]
+    public ErrorResponse(string traceId, IReadOnlyCollection<Error> errors)
     {
         TraceId = traceId;
-        _errors = errors.ToList();
+        _errors = errors?.ToList() ?? new List<Error>();
     }
 
     public string TraceId { get; }
     public IReadOnlyCollection<Error> Errors => _errors.AsReadOnly();
 }
 
-public record Error(string Message, string Source);
+public record Error
+{
+    [JsonConstructor]
+    public Error(string message, string source)
+    {
+        Message = message;
+        Source = source;
+    }
+
+    public string Message { get; }
+    public string Source { get; }
+}

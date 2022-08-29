@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
@@ -11,15 +10,14 @@ public class ServiceClientBase
     private readonly HttpClient _httpClient;
     private readonly ILogger<ServiceClientBase> _logger;
 
-
-    public ServiceClientBase(HttpClient httpClient, string version, ILogger<ServiceClientBase> logger)
+    public ServiceClientBase(HttpClient httpClient, ILogger<ServiceClientBase> logger)
     {
         ArgumentNullException.ThrowIfNull(httpClient, nameof(httpClient));
         ArgumentNullException.ThrowIfNull(logger, nameof(logger));
 
         _httpClient = httpClient;
         _logger = logger;
-        ServiceUri = new Uri(httpClient.BaseAddress!, version);
+        ServiceUri = httpClient.BaseAddress;
     }
 
     protected Uri ServiceUri { get; }
@@ -43,32 +41,15 @@ public class ServiceClientBase
                     "Internal request '{HttpMethod} {RequestUri}' successful. RequestId: {RequestId}",
                     requestMessage.Method, requestMessage.RequestUri, requestId);
 
-                return new ServiceResponse((int)responseMessage.StatusCode);
+                return new ServiceResponse((int)responseMessage.StatusCode, requestId);
             }
 
             string content = await responseMessage.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
 
-            if (_logger.IsEnabled(LogLevel.Debug))
-            {
-                _logger.LogWarning(
-                    "Internal request '{HttpMethod} {RequestUri}' unsuccessful. StatusCode: {StatusCode}; RequestId: {RequestId}; Content: {Content}",
-                    requestMessage.Method, requestMessage.RequestUri, responseMessage.StatusCode, requestId, content);
-            }
-            else
-            {
-                _logger.LogWarning(
-                    "Internal request '{HttpMethod} {RequestUri}' unsuccessful. StatusCode: {StatusCode}; RequestId: {RequestId}",
-                    requestMessage.Method, requestMessage.RequestUri, responseMessage.StatusCode, requestId);
-            }
-
-            if (responseMessage.StatusCode >= HttpStatusCode.InternalServerError)
-            {
-                throw new InternalServiceException(requestId, requestMessage.Method, requestMessage.RequestUri,
-                    responseMessage.StatusCode, content);
-            }
+            LogResponse(responseMessage, requestId, content);
 
             var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(content, Extensions.JsonSerializerOptions);
-            return new ServiceResponse((int)responseMessage.StatusCode, errorResponse);
+            return new ServiceResponse((int)responseMessage.StatusCode, errorResponse?.TraceId ?? requestId, errorResponse?.Errors);
         }
         catch (Exception ex)
         {
@@ -76,8 +57,7 @@ public class ServiceClientBase
         }
     }
 
-    protected async Task<ServiceResponse<TResponse>> Send<TResponse>(HttpRequestMessage requestMessage,
-        CancellationToken ct = default)
+    protected async Task<ServiceResponse<TResponse>> Send<TResponse>(HttpRequestMessage requestMessage, CancellationToken ct = default)
         where TResponse : class
     {
         ArgumentNullException.ThrowIfNull(requestMessage, nameof(requestMessage));
@@ -93,42 +73,42 @@ public class ServiceClientBase
 
             if (responseMessage.IsSuccessStatusCode)
             {
-                _logger.LogInformation(
-                    "Internal request '{HttpMethod} {RequestUri}' successful. RequestId: {RequestId}",
+                _logger.LogInformation("Internal request '{HttpMethod} {RequestUri}' successful. RequestId: {RequestId}",
                     requestMessage.Method, requestMessage.RequestUri, requestId);
 
-                var contentStream =
-                    await responseMessage.Content.ReadFromJsonAsync<TResponse>(Extensions.JsonSerializerOptions, ct);
-                return new ServiceResponse<TResponse>(contentStream, (int)responseMessage.StatusCode);
+                var successfulResponse = await responseMessage.Content.ReadFromJsonAsync<TResponse>(Extensions.JsonSerializerOptions, ct);
+                return new ServiceResponse<TResponse>(successfulResponse, (int)responseMessage.StatusCode, requestId);
             }
 
-            string content = await responseMessage.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+            string failedResponse = await responseMessage.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
 
-            if (_logger.IsEnabled(LogLevel.Debug))
-            {
-                _logger.LogWarning(
-                    "Internal request '{HttpMethod} {RequestUri}' unsuccessful. StatusCode: {StatusCode}; RequestId: {RequestId}; Content: {Content}",
-                    requestMessage.Method, requestMessage.RequestUri, responseMessage.StatusCode, requestId, content);
-            }
-            else
-            {
-                _logger.LogWarning(
-                    "Internal request '{HttpMethod} {RequestUri}' unsuccessful. StatusCode: {StatusCode}; RequestId: {RequestId}",
-                    requestMessage.Method, requestMessage.RequestUri, responseMessage.StatusCode, requestId);
-            }
+            LogResponse(responseMessage, requestId, failedResponse);
 
-            if (responseMessage.StatusCode >= HttpStatusCode.InternalServerError)
-            {
-                throw new InternalServiceException(requestId, requestMessage.Method, requestMessage.RequestUri,
-                    responseMessage.StatusCode, content);
-            }
-
-            var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(content, Extensions.JsonSerializerOptions);
-            return new ServiceResponse<TResponse>(default, (int)responseMessage.StatusCode, errorResponse);
+            var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(failedResponse, Extensions.JsonSerializerOptions);
+            return new ServiceResponse<TResponse>(default, (int)responseMessage.StatusCode, errorResponse?.TraceId ?? requestId, errorResponse?.Errors);
         }
         catch (Exception ex)
         {
             throw new UnhandledServiceException(requestId, requestMessage.Method, requestMessage.RequestUri, ex);
+        }
+    }
+
+    private void LogResponse(HttpResponseMessage responseMessage, string requestId, string content)
+    {
+        var method = responseMessage.RequestMessage?.Method;
+        var requestUri = responseMessage.RequestMessage?.RequestUri;
+        
+        if (_logger.IsEnabled(LogLevel.Debug))
+        {
+            _logger.LogWarning(
+                "Internal request '{HttpMethod} {RequestUri}' unsuccessful. StatusCode: {StatusCode}; RequestId: {RequestId}; Content: {Content}",
+                method, requestId, responseMessage.StatusCode, requestId, content);
+        }
+        else
+        {
+            _logger.LogWarning(
+                "Internal request '{HttpMethod} {RequestUri}' unsuccessful. StatusCode: {StatusCode}; RequestId: {RequestId}",
+                method, requestUri, responseMessage.StatusCode, requestId);
         }
     }
 }

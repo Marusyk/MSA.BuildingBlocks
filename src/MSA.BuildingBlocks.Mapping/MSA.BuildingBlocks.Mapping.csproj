@@ -15,7 +15,7 @@
     <PackageIcon>block.png</PackageIcon>
     <PackageProjectUrl>https://github.com/Marusyk/MSA.BuildingBlocks</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Marusyk/MSA.BuildingBlocks</RepositoryUrl>
-    <PackageTags>autpmapper;mapping;c-sharp-library</PackageTags>
+    <PackageTags>automapper;mapping;c-sharp-library</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup>
