@@ -6,7 +6,7 @@ var nugetApiUrl = EnvironmentVariable("NUGET_API_URL");
 
 DirectoryPath artifactsDir = Directory("./artifacts/");
 
-var projectFile = File("./src/MSA.BuildingBlocks.Mapping/MSA.BuildingBlocks.Mapping.csproj");
+var solutionFile = File("./src/MSA.BuildingBlocks.sln");
 
 Task("Clean")
     .Does(() =>
@@ -19,7 +19,7 @@ Task("Restore")
     .IsDependentOn("Clean")
     .Does(() =>
 {
-    DotNetRestore(projectFile);
+    DotNetRestore(solutionFile);
 });
 
 Task("Build")
@@ -32,14 +32,14 @@ Task("Build")
         NoRestore = true,
         NoLogo = true
     };
-    DotNetBuild(projectFile, settings);
+    DotNetBuild(solutionFile, settings);
 });
 
 Task("NuGetPack")
     .IsDependentOn("Build")
     .Does(() =>
 {
-    DotNetPack(projectFile, new DotNetCorePackSettings
+    DotNetPack(solutionFile, new DotNetCorePackSettings
     {
         Configuration = configuration,
         NoRestore = true,
@@ -56,11 +56,15 @@ Task("NuGetPush")
     .Does(() =>
 {
     var packages = GetFiles(string.Concat(artifactsDir, "/", "*.nupkg"));
-    DotNetNuGetPush(packages.First(), new DotNetCoreNuGetPushSettings
+    foreach(var package in packages)
     {
-        Source = nugetApiUrl,
-        ApiKey = nugetApiKey
-    });
+        DotNetNuGetPush(package.FullPath, new DotNetCoreNuGetPushSettings
+        {
+            Source = nugetApiUrl,
+            SkipDuplicate = true,
+            ApiKey = nugetApiKey
+        });
+     }
 });
 
 Task("Default")

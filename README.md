@@ -7,18 +7,21 @@ MSA.BuildingBlocks will include the following packages:
 * [ ] MSA.BuildingBlocks.FileStorage - infrastructure for work with file storage (Azure Blob storage, Azure DataLake, Amazon S3)
 * [ ] MSA.BuildingBlocks.Logging - contains common logging infrastructure that using Serilog with Elasticsearch format and Application Insight sink
 * [ ] MSA.BuildingBlocks.Metrics - prometheus metrics extensions
-* [ ] MSA.BuildingBlocks.RESTSDK - infrastructure for internal communication between services by HTTP
+* [x] MSA.BuildingBlocks.ServiceClient - infrastructure for internal communication between services by HTTP
 * [ ] MSA.BuildingBlocks.Tracing - infrastructure for distributed tracing
 * [ ] MSA.BuildingBlocks.WebApp - infrastructure for work with web application that based on ASP.NET Core
 * [ ] MSA.BuildingBlocks.Caching - common caching infrastructue
 * [x] MSA.BuildingBlocks.Mapping - extensions and interfaces `IMapTo<>` and `IMapFrom<>` for AutoMapper
 * [ ] MSA.BuildingBlocks.CosmosDbMigrations - migration mechanism for CosmosDB
 
-# How to Install
+## How to Install
 
 Install as a library from [Nuget](https://www.nuget.org/packages?q=MSA.BuildingBlocks):
 
 **[MSA.BuildingBlocks.Mapping](https://www.nuget.org/packages/MSA.BuildingBlocks.Mapping/)**
 
     PM> Install-Package MSA.BuildingBlocks.Mapping
-    
+
+**[MSA.BuildingBlocks.ServiceClient](https://www.nuget.org/packages/MSA.BuildingBlocks.ServiceClient/)**
+
+    PM> Install-Package MSA.BuildingBlocks.ServiceClient
