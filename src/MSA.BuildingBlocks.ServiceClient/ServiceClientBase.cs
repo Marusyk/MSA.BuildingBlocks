@@ -5,24 +5,42 @@ using Microsoft.Extensions.Logging;
 
 namespace MSA.BuildingBlocks.ServiceClient;
 
+/// <summary>
+/// Service client which provides a wrapper around the <see cref="HttpClient"/> class to send requests.
+/// </summary>
 public class ServiceClientBase
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<ServiceClientBase> _logger;
 
-    public ServiceClientBase(HttpClient httpClient, ILogger<ServiceClientBase> logger)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ServiceClientBase"/> class.
+    /// </summary>
+    /// <param name="httpClient">An instance of <see cref="HttpClient"/> used to send HTTP requests.</param>
+    /// <param name="version">The API version used by the service.</param>
+    /// <param name="logger">An instance of <see cref="ILogger{TCategoryName}"/> used for logging.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="httpClient"/>, <paramref name="logger"/>, or <paramref name="httpClient.BaseAddress"/> is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="version"/> is null or empty.</exception>
+    public ServiceClientBase(HttpClient httpClient, string version, ILogger<ServiceClientBase> logger)
     {
         ArgumentNullException.ThrowIfNull(httpClient, nameof(httpClient));
         ArgumentNullException.ThrowIfNull(logger, nameof(logger));
+        ArgumentNullException.ThrowIfNull(httpClient.BaseAddress, nameof(httpClient.BaseAddress));
+        ArgumentException.ThrowIfNullOrEmpty(version, nameof(version));
 
         _httpClient = httpClient;
         _logger = logger;
-        ServiceUri = httpClient.BaseAddress;
+        ServiceUri = new Uri(httpClient.BaseAddress, version);
     }
 
     protected Uri ServiceUri { get; }
 
-    protected async Task<ServiceResponse> Send(HttpRequestMessage requestMessage, CancellationToken ct = default)
+    /// <summary>
+    /// Sends an HTTP request and receives a <see cref="ServiceResponse"/>.
+    /// </summary>
+    /// <exception cref="UnhandledServiceException">Thrown if an error occurs during request processing.</exception>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="requestMessage"/> is null.</exception>
+    protected async Task<ServiceResponse> SendAsync(HttpRequestMessage requestMessage, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(requestMessage, nameof(requestMessage));
 
@@ -57,7 +75,12 @@ public class ServiceClientBase
         }
     }
 
-    protected async Task<ServiceResponse<TResponse>> Send<TResponse>(HttpRequestMessage requestMessage, CancellationToken ct = default)
+    /// <summary>
+    /// Sends an HTTP request and receives a <see cref="ServiceResponse{TResponse}"/>.
+    /// </summary>
+    /// <exception cref="UnhandledServiceException">Thrown if an error occurs during request processing.</exception>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="requestMessage"/> is null.</exception>
+    protected async Task<ServiceResponse<TResponse>> SendAsync<TResponse>(HttpRequestMessage requestMessage, CancellationToken ct = default)
         where TResponse : class
     {
         ArgumentNullException.ThrowIfNull(requestMessage, nameof(requestMessage));
@@ -97,7 +120,7 @@ public class ServiceClientBase
     {
         var method = responseMessage.RequestMessage?.Method;
         var requestUri = responseMessage.RequestMessage?.RequestUri;
-        
+
         if (_logger.IsEnabled(LogLevel.Debug))
         {
             _logger.LogWarning(
