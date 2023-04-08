@@ -58,7 +58,7 @@ public static class ServiceClientExtensions
         ArgumentNullException.ThrowIfNull(options, nameof(options));
         ArgumentNullException.ThrowIfNull(client, nameof(client));
 
-        services.AddHttpClient<TClient, TImplementation>(nameof(TImplementation), client)
+        services.AddHttpClient<TClient, TImplementation>(typeof(TImplementation).Name, client)
             .AddTransientHttpErrorPolicy(policyBuilder =>
                 policyBuilder
                     .OrResult(result => result.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
@@ -117,7 +117,7 @@ public static class ServiceClientExtensions
         ArgumentNullException.ThrowIfNull(options, nameof(options));
         ArgumentNullException.ThrowIfNull(client, nameof(client));
 
-        services.AddHttpClient<TImplementation>(nameof(TImplementation), client)
+        services.AddHttpClient<TImplementation>(typeof(TImplementation).Name, client)
             .AddTransientHttpErrorPolicy(policyBuilder => policyBuilder
                     .OrResult(result => result.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
                     .CircuitBreakerAsync(
