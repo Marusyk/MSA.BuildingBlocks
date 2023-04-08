@@ -11,6 +11,12 @@ namespace MSA.BuildingBlocks.ServiceClient;
 /// </summary>
 public static class ServiceClientExtensions
 {
+    private static readonly ServiceClientOptions _serviceClientOptions = new()
+    {
+        CircuitBreakerPolicy = new ClientCircuitBreakerPolicy { ExceptionsAllowedBeforeBreaking = 3, DurationOfBreakSeconds = 180 },
+        RetryPolicy = new ClientRetryPolicy { MaxRetryCount = 3, MedianFirstDelayRetrySeconds = 1 }
+    };
+
     /// <summary>
     /// Registers a service client and its implementation with the specified <paramref name="services"/> collection using the specified <paramref name="host"/>, <paramref name="authToken"/>, and <paramref name="options"/>.
     /// </summary>
@@ -23,7 +29,7 @@ public static class ServiceClientExtensions
     /// <returns>The updated <see cref="IServiceCollection"/>.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="host"/>, <paramref name="authToken"/>, or <paramref name="options"/> is null.</exception>
     public static IServiceCollection AddServiceClient<TClient, TImplementation>(this IServiceCollection services,
-        Uri host, AuthenticationHeaderValue authToken, ServiceClientOptions options)
+        Uri host, AuthenticationHeaderValue authToken, ServiceClientOptions options = default)
         where TClient : class
         where TImplementation : class, TClient
     {
@@ -36,7 +42,7 @@ public static class ServiceClientExtensions
                 client.BaseAddress = host;
                 client.DefaultRequestHeaders.Authorization = authToken;
             },
-            options);
+            options ?? _serviceClientOptions);
     }
 
     ///<summary>
@@ -50,13 +56,14 @@ public static class ServiceClientExtensions
     /// <returns>The updated <see cref="IServiceCollection"/>.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="services"/>, <paramref name="client"/>, or <paramref name="options"/> is null.</exception>
     public static IServiceCollection AddServiceClient<TClient, TImplementation>(this IServiceCollection services,
-        Action<HttpClient> client, ServiceClientOptions options)
+        Action<HttpClient> client, ServiceClientOptions options = default)
         where TClient : class
         where TImplementation : class, TClient
     {
         ArgumentNullException.ThrowIfNull(services, nameof(services));
-        ArgumentNullException.ThrowIfNull(options, nameof(options));
         ArgumentNullException.ThrowIfNull(client, nameof(client));
+
+        options ??= _serviceClientOptions;
 
         services.AddHttpClient<TClient, TImplementation>(typeof(TImplementation).Name, client)
             .AddTransientHttpErrorPolicy(policyBuilder =>
@@ -85,7 +92,7 @@ public static class ServiceClientExtensions
     /// <returns>The service collection with the service client implementation added.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="host"/>, <paramref name="authToken"/>, or <paramref name="options"/> is null.</exception>
     public static IServiceCollection AddServiceClient<TImplementation>(this IServiceCollection services,
-        Uri host, AuthenticationHeaderValue authToken, ServiceClientOptions options)
+        Uri host, AuthenticationHeaderValue authToken, ServiceClientOptions options = default)
         where TImplementation : class
     {
         ArgumentNullException.ThrowIfNull(host, nameof(host));
@@ -97,7 +104,7 @@ public static class ServiceClientExtensions
                 client.BaseAddress = host;
                 client.DefaultRequestHeaders.Authorization = authToken;
             },
-            options);
+            options ?? _serviceClientOptions);
     }
 
     /// <summary>
@@ -110,12 +117,13 @@ public static class ServiceClientExtensions
     /// <returns>The service collection with the service client implementation added.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="services"/>, <paramref name="options"/>, or <paramref name="client"/> is null.</exception>
     public static IServiceCollection AddServiceClient<TImplementation>(this IServiceCollection services,
-        Action<HttpClient> client, ServiceClientOptions options)
+        Action<HttpClient> client, ServiceClientOptions options = default)
         where TImplementation : class
     {
         ArgumentNullException.ThrowIfNull(services, nameof(services));
-        ArgumentNullException.ThrowIfNull(options, nameof(options));
         ArgumentNullException.ThrowIfNull(client, nameof(client));
+
+        options ??= _serviceClientOptions;
 
         services.AddHttpClient<TImplementation>(typeof(TImplementation).Name, client)
             .AddTransientHttpErrorPolicy(policyBuilder => policyBuilder
