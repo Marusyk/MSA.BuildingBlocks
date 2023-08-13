@@ -12,7 +12,9 @@ To install the package, use the following command in the Package Manager Console
 
 ## Usage
 
-First, add the `IServiceClient` to the dependency injection container in `Startup.cs`:
+Package version **1.0.0**.
+
+First, add the `AddServiceClient` to the dependency injection container in `Startup.cs`:
 
 ```csharp
 using MSA.BuildingBlocks.ServiceClient;
@@ -24,6 +26,11 @@ public void ConfigureServices(IServiceCollection services)
             {
                 client.BaseAddress = new Uri("https://example.com");
             },
+        new ServiceClientOptions ()
+            {
+                CircuitBreakerPolicy = new ClientCircuitBreakerPolicy { ExceptionsAllowedBeforeBreaking = 3, DurationOfBreakSeconds = 180 },
+                RetryPolicy = new ClientRetryPolicy { MaxRetryCount = 3, MedianFirstDelayRetrySeconds = 1 }
+            }
     );
 }
 ```
@@ -70,14 +77,18 @@ public interface IMyServiceApi
 
 public class MyServiceClientApi : ServiceClientBase, IMyServiceApi
 {
+    private const string ApiVersion = "v1";
+    private const string MyServiceSegment = "resource";
+
     public MyServiceClientApi(HttpClient client, ILoggerFactory loggerFactory, string version)
-    : base(client, version, loggerFactory.CreateLogger<ServiceClientBase>())
+    : base(client, ApiVersion, loggerFactory.CreateLogger<ServiceClientBase>())
     {
     }
 
     public Task<ServiceResponse<MyResponse>> MyMethod(Request request, string token)
     {
         HttpRequestMessage requestMessage = ServiceUri.AbsoluteUri
+            .AppendPathSegments(MyServiceSegment) // appending segments of the resource for a request
             .WithHttpMethod(HttpMethod.Post) // HTTP method of the endpoint
             .WithJsonContent(request) // request body
             .WithHeader(HeadersNames.Authorization, token); // for passing authentication token
@@ -91,4 +102,3 @@ public class MyResponse
     public string Message { get; set; }
 }
 ```
-
