@@ -8,17 +8,17 @@
 Packages
 The MSA.BuildingBlocks library includes the following packages:
 
-* [x] [MSA.BuildingBlocks.ServiceClient](src/MSA.BuildingBlocks.ServiceClient/README.md): Provides infrastructure for internal HTTP communication between services.
-* [x] [MSA.BuildingBlocks.Mapping](src/MSA.BuildingBlocks.Mapping/README.md): Contains extensions and interfaces IMapTo<> and IMapFrom<> for AutoMapper, facilitating object-object mapping.
-* [ ] MSA.BuildingBlocks.CosmosDbMigrations: Implements a migration mechanism for CosmosDB, ensuring your database schema is always up-to-date.
-* [ ] MSA.BuildingBlocks.EventBus: Offers infrastructure for working with messaging-broker technologies like Azure Service Bus, RabbitMQ, and Kafka.
-* [ ] MSA.BuildingBlocks.RequestReplyBus: Provides infrastructure for working with messaging-broker technologies like Azure Service Bus and RabbitMQ, specifically tailored for request-reply messaging patterns.
-* [ ] MSA.BuildingBlocks.FileStorage: Facilitates work with file storage systems such as Azure Blob storage, Azure DataLake, and Amazon S3.
-* [ ] MSA.BuildingBlocks.Logging: Contains a common logging infrastructure that uses Serilog with Elasticsearch format and Application Insight sink.
-* [ ] MSA.BuildingBlocks.Metrics: Provides extensions for Prometheus metrics.
-* [ ] MSA.BuildingBlocks.Tracing: Implements infrastructure for distributed tracing, improving observability in microservice architectures.
-* [ ] MSA.BuildingBlocks.WebApp: Provides infrastructure for working with web applications based on ASP.NET Core.
-* [ ] MSA.BuildingBlocks.Caching: Implements a common caching infrastructure, improving performance by reducing unnecessary database calls.
+* [x] [**MSA.BuildingBlocks.ServiceClient**](src/MSA.BuildingBlocks.ServiceClient/README.md): Provides infrastructure for internal HTTP communication between services.
+* [x] [**MSA.BuildingBlocks.Mapping**](src/MSA.BuildingBlocks.Mapping/README.md): Contains extensions and interfaces IMapTo<> and IMapFrom<> for AutoMapper, facilitating object-object mapping.
+* [ ] **MSA.BuildingBlocks.CosmosDbMigrations**: Implements a migration mechanism for CosmosDB, ensuring your database schema is always up-to-date.
+* [ ] **MSA.BuildingBlocks.EventBus**: Offers infrastructure for working with messaging-broker technologies like Azure Service Bus, RabbitMQ, and Kafka.
+* [ ] **MSA.BuildingBlocks.RequestReplyBus**: Provides infrastructure for working with messaging-broker technologies like Azure Service Bus and RabbitMQ, specifically tailored for request-reply messaging patterns.
+* [ ] **MSA.BuildingBlocks.FileStorage**: Facilitates work with file storage systems such as Azure Blob storage, Azure DataLake, and Amazon S3.
+* [ ] **MSA.BuildingBlocks.Logging**: Contains a common logging infrastructure that uses Serilog with Elasticsearch format and Application Insight sink.
+* [ ] **MSA.BuildingBlocks.Metrics**: Provides extensions for Prometheus metrics.
+* [ ] **MSA.BuildingBlocks.Tracing**: Implements infrastructure for distributed tracing, improving observability in microservice architectures.
+* [ ] **MSA.BuildingBlocks.WebApp**: Provides infrastructure for working with web applications based on ASP.NET Core.
+* [ ] **MSA.BuildingBlocks.Caching**: Implements a common caching infrastructure, improving performance by reducing unnecessary database calls.
 
 
 ## How to Install
