@@ -1,3 +1,5 @@
+<img align="right" width="100" src="block.png" />
+
 # MSA.BuildingBlocks
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Marusyk/grok.net/blob/main/LICENSE)
