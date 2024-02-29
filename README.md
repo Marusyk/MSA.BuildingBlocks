@@ -1,4 +1,4 @@
-<img align="right" width="100" src="block.png" />
+<img align="right" width="100" src="block.png" /><img align="right" width="100" src="block.png" /><img align="right" width="100" src="block.png" />
 
 # MSA.BuildingBlocks
 
