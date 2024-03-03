@@ -27,14 +27,14 @@ The MSA.BuildingBlocks library includes the following packages:
 
 Install as a library from [Nuget](https://www.nuget.org/packages?q=MSA.BuildingBlocks):
 
-**[MSA.BuildingBlocks.Mapping](https://www.nuget.org/packages/MSA.BuildingBlocks.Mapping/)** 
+**[MSA.BuildingBlocks.Mapping](https://www.nuget.org/packages/MSA.BuildingBlocks.Mapping/)** ([usage](https://github.com/Marusyk/MSA.BuildingBlocks/blob/main/src/MSA.BuildingBlocks.Mapping/README.md))
 
 [![NuGet version](https://img.shields.io/nuget/v/MSA.BuildingBlocks.Mapping.svg?logo=NuGet)](https://www.nuget.org/packages/MSA.BuildingBlocks.Mapping)
 [![Nuget](https://img.shields.io/nuget/dt/MSA.BuildingBlocks.Mapping.svg)](https://www.nuget.org/packages/MSA.BuildingBlocks.Mapping)
 
     PM> Install-Package MSA.BuildingBlocks.Mapping
 
-**[MSA.BuildingBlocks.ServiceClient](https://www.nuget.org/packages/MSA.BuildingBlocks.ServiceClient/)**
+**[MSA.BuildingBlocks.ServiceClient](https://www.nuget.org/packages/MSA.BuildingBlocks.ServiceClient/)** ([usage](https://github.com/Marusyk/MSA.BuildingBlocks/blob/main/src/MSA.BuildingBlocks.ServiceClient/README.md))
 
 [![NuGet version](https://img.shields.io/nuget/v/MSA.BuildingBlocks.ServiceClient.svg?logo=NuGet)](https://www.nuget.org/packages/MSA.BuildingBlocks.ServiceClient)
 [![Nuget](https://img.shields.io/nuget/dt/MSA.BuildingBlocks.ServiceClient.svg)](https://www.nuget.org/packages/MSA.BuildingBlocks.ServiceClient)
