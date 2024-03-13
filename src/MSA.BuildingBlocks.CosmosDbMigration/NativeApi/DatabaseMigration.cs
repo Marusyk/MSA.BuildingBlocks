@@ -1,6 +1,5 @@
-﻿using Azure;
 using Microsoft.Azure.Cosmos;
-using MSA.BuildingBlocks.CosmosDbMigration.Abstractions;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -11,36 +10,44 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MSA.BuildingBlocks.CosmosDbMigration.NoSQL;
+namespace MSA.BuildingBlocks.CosmosDbMigration;
 
-public class DatabaseMigration(CosmosClient cosmosClient, string databaseId, string containerId)
-    : BaseDatabaseMigration(cosmosClient, databaseId, containerId)
+public class DatabaseMigration(CosmosClient cosmosClient, string databaseId, string containerId, ILogger<DatabaseMigration> logger)
+    : BaseDatabaseMigration(cosmosClient, databaseId, containerId, logger)
 {
     public override async Task CloneContainer(string containerId, string partitionKey)
     {
+        ArgumentException.ThrowIfNullOrEmpty(containerId);
+        ArgumentException.ThrowIfNullOrEmpty(partitionKey);
+
         (IList<ExpandoObject> items, double requestCharge) = await GetItems().ConfigureAwait(false);
 
         double createContainerAndUploadItemsCharge = await CreateContainerAndUploadItems(containerId, partitionKey, items).ConfigureAwait(false);
         requestCharge += createContainerAndUploadItemsCharge;
 
-        Console.WriteLine($"{nameof(CloneContainer)} with items count {items.Count} operation cost {requestCharge} RUs.");
+        _logger.LogInformation("{OperationName} with items count {Count} operation cost {Charge} RUs.", nameof(CloneContainer), items.Count, requestCharge);
     }
 
     public override async Task DeleteContainer()
     {
         ContainerResponse response = await _container.DeleteContainerAsync().ConfigureAwait(false);
-        Console.WriteLine($"{nameof(DeleteContainer)} operation cost {response.RequestCharge} RUs.");
+
+        _logger.LogInformation("{OperationName} operation cost {Charge} RUs.", nameof(DeleteContainer), response.RequestCharge);
     }
 
     public override async Task CreateContainer(string containerId, string partitionKey)
     {
+        ArgumentException.ThrowIfNullOrEmpty(containerId);
+        ArgumentException.ThrowIfNullOrEmpty(partitionKey);
+
         ContainerResponse response = await _container.Database.CreateContainerIfNotExistsAsync(containerId, $"/{partitionKey}").ConfigureAwait(false);
-        Console.WriteLine($"{nameof(CreateContainer)} operation cost {response.RequestCharge} RUs.");
+
+        _logger.LogInformation("{OperationName} operation cost {Charge} RUs.", nameof(CreateContainer), response.RequestCharge);
     }
 
     public override async Task RecreateContainerWithNewPartitionKey(string partitionKey)
     {
-        ArgumentException.ThrowIfNullOrEmpty(partitionKey, nameof(partitionKey));
+        ArgumentException.ThrowIfNullOrEmpty(partitionKey);
 
         (IList<ExpandoObject> items, double requestCharge) = await GetItems().ConfigureAwait(false);
 
@@ -50,24 +57,7 @@ public class DatabaseMigration(CosmosClient cosmosClient, string databaseId, str
         double createContainerAndUploadItemsCharge = await CreateContainerAndUploadItems(_container.Id, partitionKey, items).ConfigureAwait(false);
         requestCharge += createContainerAndUploadItemsCharge;
 
-        Console.WriteLine($"{nameof(RecreateContainerWithNewPartitionKey)} operation with items count {items.Count} cost {requestCharge} RUs.");
-    }
-
-    protected override async Task<(IList<ExpandoObject>, double)> GetItems(string query = "SELECT * FROM c")
-    {
-        double requestCharge = 0.0;
-        List<ExpandoObject> items = [];
-
-        using FeedIterator<ExpandoObject> feedIterator = _container.GetItemQueryIterator<ExpandoObject>(new QueryDefinition(query));
-        while (feedIterator.HasMoreResults)
-        {
-            FeedResponse<ExpandoObject> feedItems = await feedIterator.ReadNextAsync().ConfigureAwait(false);
-            requestCharge += feedItems.RequestCharge;
-
-            items.AddRange(feedItems);
-        }
-
-        return (items, requestCharge);
+        _logger.LogInformation("{OperationName} with items count {Count} operation cost {Charge} RUs.", nameof(RecreateContainerWithNewPartitionKey), items.Count, requestCharge);
     }
 
     public override async Task ReplaceIndexingPolicy(
@@ -108,37 +98,35 @@ public class DatabaseMigration(CosmosClient cosmosClient, string databaseId, str
         }
 
         ContainerResponse response = await _container.ReplaceContainerAsync(containerProperties).ConfigureAwait(false);
-        Console.WriteLine($"{nameof(ReplaceIndexingPolicy)} operation cost {response.RequestCharge} RUs.");
-    }
 
-    private async Task<double> CreateContainerAndUploadItems(string containerId, string partitionKey, IEnumerable<ExpandoObject> items)
-    {
-        ContainerResponse createContainerResponse = await _container.Database.CreateContainerIfNotExistsAsync(containerId, $"/{partitionKey}").ConfigureAwait(false);
-        double requestCharge = createContainerResponse.RequestCharge;
-
-        foreach (ExpandoObject item in items)
-        {
-            PartitionKey key = new(item.FirstOrDefault(x => x.Key == partitionKey).Value?.ToString());
-            ResponseMessage createItemResponse = await createContainerResponse.Container.CreateItemStreamAsync(GetItemStream(item), key).ConfigureAwait(false);
-            requestCharge += createItemResponse.Headers.RequestCharge;
-        }
-
-        _container = createContainerResponse.Container;
-        _container = await createContainerResponse.Container.ReadContainerAsync().ConfigureAwait(false);
-
-        return requestCharge;
-
-        static MemoryStream GetItemStream(ExpandoObject item)
-        {
-            byte[] bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(item));
-            return new MemoryStream(bytes);
-        }
+        _logger.LogInformation("{OperationName} operation cost {Charge} RUs.", nameof(ReplaceIndexingPolicy), response.RequestCharge);
     }
 
     public override async Task SwitchToContainer(string containerId, string? databaseId = null)
     {
-        _container = _client.GetContainer(databaseId ?? _container.Database.Id, containerId);
+        ArgumentException.ThrowIfNullOrEmpty(containerId);
+
+        _container = _cosmosClient.GetContainer(databaseId ?? _container.Database.Id, containerId);
         _containerProperties = await _container.ReadContainerAsync().ConfigureAwait(false);
+
+        _logger.LogInformation("Switching to container {ContainerId} and database {DatabaseId} is successful", containerId, databaseId);
+    }
+
+    protected override async Task<(IList<ExpandoObject>, double)> GetItems(string query = "SELECT * FROM c")
+    {
+        double requestCharge = 0.0;
+        List<ExpandoObject> items = [];
+
+        using FeedIterator<ExpandoObject> feedIterator = _container.GetItemQueryIterator<ExpandoObject>(new QueryDefinition(query));
+        while (feedIterator.HasMoreResults)
+        {
+            FeedResponse<ExpandoObject> feedItems = await feedIterator.ReadNextAsync().ConfigureAwait(false);
+            requestCharge += feedItems.RequestCharge;
+
+            items.AddRange(feedItems);
+        }
+
+        return (items, requestCharge);
     }
 
     public override async Task AddIndexingPolicy(
@@ -213,10 +201,35 @@ public class DatabaseMigration(CosmosClient cosmosClient, string databaseId, str
         if (indexesChanged)
         {
             ContainerResponse response = await _container.ReplaceContainerAsync(_containerProperties).ConfigureAwait(false);
-            Console.WriteLine($"{nameof(AddIndexingPolicy)} operation cost {response.RequestCharge} RUs.");
+
+            _logger.LogInformation("{OperationName} operation cost {Charge} RUs.", nameof(AddIndexingPolicy), response.RequestCharge);
             return;
         }
 
-        Console.WriteLine($"{nameof(AddIndexingPolicy)} operation does not apply because nothing new added.");
+        _logger.LogInformation("{OperationName} operation does not apply because nothing new added.", nameof(AddIndexingPolicy));
+    }
+
+    private async Task<double> CreateContainerAndUploadItems(string containerId, string partitionKey, IEnumerable<ExpandoObject> items)
+    {
+        ContainerResponse createContainerResponse = await _container.Database.CreateContainerIfNotExistsAsync(containerId, $"/{partitionKey}").ConfigureAwait(false);
+        double requestCharge = createContainerResponse.RequestCharge;
+
+        foreach (ExpandoObject item in items)
+        {
+            PartitionKey key = new(item.FirstOrDefault(x => x.Key == partitionKey).Value?.ToString());
+            ResponseMessage createItemResponse = await createContainerResponse.Container.CreateItemStreamAsync(GetItemStream(item), key).ConfigureAwait(false);
+            requestCharge += createItemResponse.Headers.RequestCharge;
+        }
+
+        _container = createContainerResponse.Container;
+        _container = await createContainerResponse.Container.ReadContainerAsync().ConfigureAwait(false);
+
+        return requestCharge;
+    }
+
+    private static MemoryStream GetItemStream(ExpandoObject item)
+    {
+        byte[] bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(item));
+        return new MemoryStream(bytes);
     }
 }

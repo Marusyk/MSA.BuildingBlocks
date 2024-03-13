@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSA.BuildingBlocks.Mapping"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSA.BuildingBlocks.ServiceClient", "MSA.BuildingBlocks.ServiceClient\MSA.BuildingBlocks.ServiceClient.csproj", "{7FDC86EA-39C9-4DD2-AEED-7A7F5EDBDB01}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSA.BuildingBlocks.CosmosDbMigration", "MSA.BuildingBlocks.CosmosDbMigration\MSA.BuildingBlocks.CosmosDbMigration.csproj", "{D88165C9-56E2-460D-B9E4-4BAAEA7A80B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSA.BuildingBlocks.CosmosDbMigration", "MSA.BuildingBlocks.CosmosDbMigration\MSA.BuildingBlocks.CosmosDbMigration.csproj", "{233184F9-A005-40F5-AF06-D23A43E981A7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{7FDC86EA-39C9-4DD2-AEED-7A7F5EDBDB01}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7FDC86EA-39C9-4DD2-AEED-7A7F5EDBDB01}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7FDC86EA-39C9-4DD2-AEED-7A7F5EDBDB01}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D88165C9-56E2-460D-B9E4-4BAAEA7A80B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D88165C9-56E2-460D-B9E4-4BAAEA7A80B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D88165C9-56E2-460D-B9E4-4BAAEA7A80B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D88165C9-56E2-460D-B9E4-4BAAEA7A80B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{233184F9-A005-40F5-AF06-D23A43E981A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{233184F9-A005-40F5-AF06-D23A43E981A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{233184F9-A005-40F5-AF06-D23A43E981A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{233184F9-A005-40F5-AF06-D23A43E981A7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -4,9 +4,8 @@
     <TargetFramework>net8.0</TargetFramework>
 	<RootNamespace>MSA.BuildingBlocks.CosmosDbMigration</RootNamespace>
 	<Nullable>enable</Nullable>
-	 <OutputType>Exe</OutputType>
+	<OutputType>Exe</OutputType>
   </PropertyGroup>
-
 
 	<PropertyGroup>
 		<PackageId>MSA.BuildingBlocks.CosmosDbMigration</PackageId>
@@ -21,7 +20,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<Version>0.1.0</Version>
+		<Version>0.1.0-alpha</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -30,6 +29,9 @@
 
 	<ItemGroup>
 	  <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.38.0" />
+	  <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
 	</ItemGroup>
 
 </Project>
