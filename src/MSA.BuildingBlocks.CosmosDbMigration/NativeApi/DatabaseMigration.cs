@@ -112,23 +112,6 @@ public class DatabaseMigration(CosmosClient cosmosClient, string databaseId, str
         _logger.LogInformation("Switching to container {ContainerId} and database {DatabaseId} is successful", containerId, databaseId);
     }
 
-    protected override async Task<(IList<ExpandoObject>, double)> GetItems(string query = "SELECT * FROM c")
-    {
-        double requestCharge = 0.0;
-        List<ExpandoObject> items = [];
-
-        using FeedIterator<ExpandoObject> feedIterator = _container.GetItemQueryIterator<ExpandoObject>(new QueryDefinition(query));
-        while (feedIterator.HasMoreResults)
-        {
-            FeedResponse<ExpandoObject> feedItems = await feedIterator.ReadNextAsync().ConfigureAwait(false);
-            requestCharge += feedItems.RequestCharge;
-
-            items.AddRange(feedItems);
-        }
-
-        return (items, requestCharge);
-    }
-
     public override async Task AddIndexingPolicy(
         Collection<IncludedPath>? includedPaths = null,
         Collection<ExcludedPath>? excludedPaths = null,
@@ -231,5 +214,22 @@ public class DatabaseMigration(CosmosClient cosmosClient, string databaseId, str
     {
         byte[] bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(item));
         return new MemoryStream(bytes);
+    }
+
+    protected override async Task<(IList<ExpandoObject>, double)> GetItems(string query = "SELECT * FROM c")
+    {
+        double requestCharge = 0.0;
+        List<ExpandoObject> items = [];
+
+        using FeedIterator<ExpandoObject> feedIterator = _container.GetItemQueryIterator<ExpandoObject>(new QueryDefinition(query));
+        while (feedIterator.HasMoreResults)
+        {
+            FeedResponse<ExpandoObject> feedItems = await feedIterator.ReadNextAsync().ConfigureAwait(false);
+            requestCharge += feedItems.RequestCharge;
+
+            items.AddRange(feedItems);
+        }
+
+        return (items, requestCharge);
     }
 }

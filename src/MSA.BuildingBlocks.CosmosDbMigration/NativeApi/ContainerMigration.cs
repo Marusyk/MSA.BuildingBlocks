@@ -140,9 +140,11 @@ public class ContainerMigration(CosmosClient cosmosClient, string databaseId, st
 
         _logger.LogInformation("{OperationName} with items count {Count} cost {Charge} RUs.", nameof(RemovePropertyFromItems), items.Count, requestCharge);
     }
+
     public override async Task RemovePropertyFromItems(IList<ExpandoObject> items, string propertyPath, string propertyName)
     {
         ArgumentNullException.ThrowIfNull(items);
+        ArgumentException.ThrowIfNullOrEmpty(propertyPath);
         ArgumentException.ThrowIfNullOrEmpty(propertyName);
 
         double requestCharge = 0.0;
