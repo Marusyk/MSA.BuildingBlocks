@@ -56,6 +56,27 @@ public class ContainerMigration(CosmosClient cosmosClient, string databaseId, st
         _logger.LogInformation("{OperationName} with items count {Count} cost {Charge} RUs.", nameof(UpsertItems), items.Count, requestCharge);
     }
 
+    public override async Task RemoveItemsByQuery(string query)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(query);
+
+        IList<ExpandoObject> items = await GetItems(query);
+        double requestCharge = 0.0;
+
+        foreach (ExpandoObject item in items)
+        {
+            string itemId = item.First(i => i.Key == "id").Value!.ToString()!;
+            string itemPartitionKey = item.First(i => i.Key == _containerProperties.PartitionKeyPath[1..]).Value!.ToString()!;
+
+            ResponseMessage response = await _container.DeleteItemStreamAsync(itemId, new(itemPartitionKey), new ItemRequestOptions { EnableContentResponseOnWrite = false });
+            _logger.LogInformation("Item with id {Id} and partition key {Key} is deleted.", itemId, itemPartitionKey);
+
+            requestCharge += response.Headers.RequestCharge;
+        }
+
+        _logger.LogInformation("{OperationName} with items count {Count} cost {Charge} RUs.", nameof(RemoveItemsByQuery), items.Count, requestCharge);
+    }
+
     public override async Task AddPropertyToItems(IList<ExpandoObject> items, string propertyPath, string propertyName, object value)
     {
         ArgumentNullException.ThrowIfNull(items);

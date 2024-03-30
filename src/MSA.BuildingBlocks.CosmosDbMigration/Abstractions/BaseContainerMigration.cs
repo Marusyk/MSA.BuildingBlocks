@@ -32,6 +32,8 @@ public abstract class BaseContainerMigration
 
     public abstract Task UpsertItems<T>(IList<T> items);
 
+    public abstract Task RemoveItemsByQuery(string query);
+
     public abstract Task AddPropertyToItems(IList<ExpandoObject> items, string propertyPath, string propertyName, object value);
 
     public abstract Task AddPropertyToItems(IList<ExpandoObject> items, string propertyName, object value);
