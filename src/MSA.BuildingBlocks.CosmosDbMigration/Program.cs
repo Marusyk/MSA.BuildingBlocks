@@ -61,10 +61,10 @@ using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsol
 BaseContainerMigration containerMigration = new ContainerMigration(
     new CosmosClient("AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw=="),
     "TestDb",
-    "TestContainer6",
+    "TestContainer1",
     factory.CreateLogger<ContainerMigration>());
 
-var items = await containerMigration.GetItems();
+//var items = await containerMigration.GetItems();
 
 //await containerMigration.UpsertItems<TestClass>(new List<TestClass>
 //{
@@ -105,8 +105,10 @@ var items = await containerMigration.GetItems();
 
 //await containerMigration.AddPropertyToItems(items, "InnerClass.SomeProp1", "SomeProp3", new { InterProp = "Some" });
 //await containerMigration.AddPropertyToItems(items, "MyProperty6", 10);
-await containerMigration.RemovePropertyFromItems(items, "InnerClass.SomeProp1", "SomeProp3");
-await containerMigration.RemovePropertyFromItems(items, "MyProperty6");
+//await containerMigration.RemovePropertyFromItems(items, "InnerClass.SomeProp1", "SomeProp3");
+//await containerMigration.RemovePropertyFromItems(items, "MyProperty6");
+
+await containerMigration.RemoveItemsByQuery("SELECT * FROM c WHERE c.CountryCode = \"AR\" and c.City = \"Necochea\"");
 
 Console.ReadLine();
 
