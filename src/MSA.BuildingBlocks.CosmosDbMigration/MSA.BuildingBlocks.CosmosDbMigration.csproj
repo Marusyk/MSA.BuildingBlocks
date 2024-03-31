@@ -4,7 +4,6 @@
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>MSA.BuildingBlocks.CosmosDbMigration</RootNamespace>
     <Nullable>enable</Nullable>
-    <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <PropertyGroup>
