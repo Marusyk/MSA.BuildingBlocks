@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32210.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSA.BuildingBlocks.Mapping", "MSA.BuildingBlocks.Mapping\MSA.BuildingBlocks.Mapping.csproj", "{6CCC9DCF-6F45-427D-94DA-7585F28A7D67}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSA.BuildingBlocks.ServiceClient", "MSA.BuildingBlocks.ServiceClient\MSA.BuildingBlocks.ServiceClient.csproj", "{7FDC86EA-39C9-4DD2-AEED-7A7F5EDBDB01}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSA.BuildingBlocks.CosmosDbMigration", "MSA.BuildingBlocks.CosmosDbMigration\MSA.BuildingBlocks.CosmosDbMigration.csproj", "{233184F9-A005-40F5-AF06-D23A43E981A7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{70C4DDFE-91CE-4A5B-A0FD-BF91A9F990A9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSA.BuildingBlocks.ServiceClient", "MSA.BuildingBlocks.ServiceClient\MSA.BuildingBlocks.ServiceClient.csproj", "{C602F21D-843B-4597-BB22-D55D24C9B4C6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSA.BuildingBlocks.Mapping", "MSA.BuildingBlocks.Mapping\MSA.BuildingBlocks.Mapping.csproj", "{CDA38D23-951C-4777-871F-7C5D609326C6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,21 +17,26 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6CCC9DCF-6F45-427D-94DA-7585F28A7D67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6CCC9DCF-6F45-427D-94DA-7585F28A7D67}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6CCC9DCF-6F45-427D-94DA-7585F28A7D67}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6CCC9DCF-6F45-427D-94DA-7585F28A7D67}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7FDC86EA-39C9-4DD2-AEED-7A7F5EDBDB01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7FDC86EA-39C9-4DD2-AEED-7A7F5EDBDB01}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7FDC86EA-39C9-4DD2-AEED-7A7F5EDBDB01}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7FDC86EA-39C9-4DD2-AEED-7A7F5EDBDB01}.Release|Any CPU.Build.0 = Release|Any CPU
 		{233184F9-A005-40F5-AF06-D23A43E981A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{233184F9-A005-40F5-AF06-D23A43E981A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{233184F9-A005-40F5-AF06-D23A43E981A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{233184F9-A005-40F5-AF06-D23A43E981A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C602F21D-843B-4597-BB22-D55D24C9B4C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C602F21D-843B-4597-BB22-D55D24C9B4C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C602F21D-843B-4597-BB22-D55D24C9B4C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C602F21D-843B-4597-BB22-D55D24C9B4C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDA38D23-951C-4777-871F-7C5D609326C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDA38D23-951C-4777-871F-7C5D609326C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDA38D23-951C-4777-871F-7C5D609326C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDA38D23-951C-4777-871F-7C5D609326C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{233184F9-A005-40F5-AF06-D23A43E981A7} = {70C4DDFE-91CE-4A5B-A0FD-BF91A9F990A9}
+		{C602F21D-843B-4597-BB22-D55D24C9B4C6} = {70C4DDFE-91CE-4A5B-A0FD-BF91A9F990A9}
+		{CDA38D23-951C-4777-871F-7C5D609326C6} = {70C4DDFE-91CE-4A5B-A0FD-BF91A9F990A9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A2E6DDAD-43F6-416D-A5BE-CC867C00654E}
