@@ -5,7 +5,13 @@ VisualStudioVersion = 17.2.32210.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSA.BuildingBlocks.Mapping", "MSA.BuildingBlocks.Mapping\MSA.BuildingBlocks.Mapping.csproj", "{6CCC9DCF-6F45-427D-94DA-7585F28A7D67}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSA.BuildingBlocks.ServiceClient", "MSA.BuildingBlocks.ServiceClient\MSA.BuildingBlocks.ServiceClient.csproj", "{7FDC86EA-39C9-4DD2-AEED-7A7F5EDBDB01}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSA.BuildingBlocks.ServiceClient", "MSA.BuildingBlocks.ServiceClient\MSA.BuildingBlocks.ServiceClient.csproj", "{7FDC86EA-39C9-4DD2-AEED-7A7F5EDBDB01}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CosmosDbMigrationConsole", "..\samples\CosmosDbMigrationConsole\CosmosDbMigrationConsole.csproj", "{7A2CB3F4-C5A0-43BB-96D3-15AF1AF27A28}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{AB270981-EB8C-488A-93F5-D5B774BC1FD1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A38096BB-43C4-422E-B611-44AE8E5407DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,9 +27,18 @@ Global
 		{7FDC86EA-39C9-4DD2-AEED-7A7F5EDBDB01}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7FDC86EA-39C9-4DD2-AEED-7A7F5EDBDB01}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7FDC86EA-39C9-4DD2-AEED-7A7F5EDBDB01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A2CB3F4-C5A0-43BB-96D3-15AF1AF27A28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A2CB3F4-C5A0-43BB-96D3-15AF1AF27A28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A2CB3F4-C5A0-43BB-96D3-15AF1AF27A28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A2CB3F4-C5A0-43BB-96D3-15AF1AF27A28}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6CCC9DCF-6F45-427D-94DA-7585F28A7D67} = {A38096BB-43C4-422E-B611-44AE8E5407DF}
+		{7FDC86EA-39C9-4DD2-AEED-7A7F5EDBDB01} = {A38096BB-43C4-422E-B611-44AE8E5407DF}
+		{7A2CB3F4-C5A0-43BB-96D3-15AF1AF27A28} = {AB270981-EB8C-488A-93F5-D5B774BC1FD1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A2E6DDAD-43F6-416D-A5BE-CC867C00654E}
