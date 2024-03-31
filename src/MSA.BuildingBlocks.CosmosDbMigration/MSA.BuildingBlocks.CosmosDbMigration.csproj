@@ -9,7 +9,7 @@
 
   <PropertyGroup>
     <PackageId>MSA.BuildingBlocks.CosmosDbMigration</PackageId>
-    <Authors>RMarusyk</Authors>
+    <Authors>RMarusyk;kanils</Authors>
     <Description>Infrastructure for making Azure Cosmos DB migrations</Description>
     <License>https://github.com/Marusyk/MSA.BuildingBlocks/blob/main/LICENSE</License>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

@@ -210,12 +210,6 @@ public class DatabaseMigration(CosmosClient cosmosClient, string databaseId, str
         return requestCharge;
     }
 
-    private static MemoryStream GetItemStream(ExpandoObject item)
-    {
-        byte[] bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(item));
-        return new MemoryStream(bytes);
-    }
-
     protected override async Task<(IList<ExpandoObject>, double)> GetItems(string query = "SELECT * FROM c")
     {
         double requestCharge = 0.0;
@@ -231,5 +225,11 @@ public class DatabaseMigration(CosmosClient cosmosClient, string databaseId, str
         }
 
         return (items, requestCharge);
+    }
+
+    private static MemoryStream GetItemStream(ExpandoObject item)
+    {
+        byte[] bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(item));
+        return new MemoryStream(bytes);
     }
 }
