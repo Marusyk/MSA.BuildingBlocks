@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>MSA.BuildingBlocks.CosmosDbMigration</RootNamespace>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>MSA.BuildingBlocks.CosmosDbMigration</PackageId>
+    <Authors>RMarusyk;kanils</Authors>
+    <Description>Infrastructure for making Azure Cosmos DB migrations</Description>
+    <License>https://github.com/Marusyk/MSA.BuildingBlocks/blob/main/LICENSE</License>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageIcon>block.png</PackageIcon>
+    <PackageProjectUrl>https://github.com/Marusyk/MSA.BuildingBlocks</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Marusyk/MSA.BuildingBlocks</RepositoryUrl>
+    <PackageTags>c-sharp-library;cosmosdb;migration</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Version>0.1.0-alpha</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\block.png" Pack="true" Visible="false" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.38.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+  </ItemGroup>
+
+</Project>
