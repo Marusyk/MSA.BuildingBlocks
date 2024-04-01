@@ -12,7 +12,7 @@ The MSA.BuildingBlocks library includes the following packages:
 
 * [x] [**MSA.BuildingBlocks.ServiceClient**](src/MSA.BuildingBlocks.ServiceClient/README.md): Provides infrastructure for internal HTTP communication between services.
 * [x] [**MSA.BuildingBlocks.Mapping**](src/MSA.BuildingBlocks.Mapping/README.md): Contains extensions and interfaces IMapTo<> and IMapFrom<> for AutoMapper, facilitating object-object mapping.
-* [x] [**MSA.BuildingBlocks.CosmosDbMigrations**](src/MSA.BuildingBlocks.CosmosDbMigration/README.md): Implements a migration mechanism for CosmosDB, ensuring your database schema is always up-to-date.
+* [x] [**MSA.BuildingBlocks.CosmosDbMigration**](src/MSA.BuildingBlocks.CosmosDbMigration/README.md): Implements a migration mechanism for CosmosDB, ensuring your database schema is always up-to-date.
 * [ ] **MSA.BuildingBlocks.EventBus**: Offers infrastructure for working with messaging-broker technologies like Azure Service Bus, RabbitMQ, and Kafka.
 * [ ] **MSA.BuildingBlocks.RequestReplyBus**: Provides infrastructure for working with messaging-broker technologies like Azure Service Bus and RabbitMQ, specifically tailored for request-reply messaging patterns.
 * [ ] **MSA.BuildingBlocks.FileStorage**: Facilitates work with file storage systems such as Azure Blob storage, Azure DataLake, and Amazon S3.
