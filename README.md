@@ -12,7 +12,7 @@ The MSA.BuildingBlocks library includes the following packages:
 
 * [x] [**MSA.BuildingBlocks.ServiceClient**](src/MSA.BuildingBlocks.ServiceClient/README.md): Provides infrastructure for internal HTTP communication between services.
 * [x] [**MSA.BuildingBlocks.Mapping**](src/MSA.BuildingBlocks.Mapping/README.md): Contains extensions and interfaces IMapTo<> and IMapFrom<> for AutoMapper, facilitating object-object mapping.
-* [ ] **MSA.BuildingBlocks.CosmosDbMigrations**: Implements a migration mechanism for CosmosDB, ensuring your database schema is always up-to-date.
+* [x] [**MSA.BuildingBlocks.CosmosDbMigrations**](src/MSA.BuildingBlocks.CosmosDbMigrations/README.md): Implements a migration mechanism for CosmosDB, ensuring your database schema is always up-to-date.
 * [ ] **MSA.BuildingBlocks.EventBus**: Offers infrastructure for working with messaging-broker technologies like Azure Service Bus, RabbitMQ, and Kafka.
 * [ ] **MSA.BuildingBlocks.RequestReplyBus**: Provides infrastructure for working with messaging-broker technologies like Azure Service Bus and RabbitMQ, specifically tailored for request-reply messaging patterns.
 * [ ] **MSA.BuildingBlocks.FileStorage**: Facilitates work with file storage systems such as Azure Blob storage, Azure DataLake, and Amazon S3.
@@ -40,3 +40,10 @@ Install as a library from [Nuget](https://www.nuget.org/packages?q=MSA.BuildingB
 [![Nuget](https://img.shields.io/nuget/dt/MSA.BuildingBlocks.ServiceClient.svg)](https://www.nuget.org/packages/MSA.BuildingBlocks.ServiceClient)
 
     PM> Install-Package MSA.BuildingBlocks.ServiceClient
+
+**[MSA.BuildingBlocks.CosmosDbMigration](https://www.nuget.org/packages/MSA.BuildingBlocks.CosmosDbMigration/)** ([usage](https://github.com/Marusyk/MSA.BuildingBlocks/blob/main/src/MSA.BuildingBlocks.CosmosDbMigration/README.md))
+
+[![NuGet version](https://img.shields.io/nuget/v/MSA.BuildingBlocks.CosmosDbMigration.svg?logo=NuGet)](https://www.nuget.org/packages/MSA.BuildingBlocks.CosmosDbMigration)
+[![Nuget](https://img.shields.io/nuget/dt/MSA.BuildingBlocks.CosmosDbMigration.svg)](https://www.nuget.org/packages/MSA.BuildingBlocks.CosmosDbMigration)
+
+    PM> Install-Package MSA.BuildingBlocks.CosmosDbMigration
