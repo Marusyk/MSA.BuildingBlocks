@@ -11,9 +11,24 @@ using Newtonsoft.Json;
 
 namespace MSA.BuildingBlocks.CosmosDbMigration;
 
-public class ContainerMigration(CosmosClient cosmosClient, string databaseId, string containerId, ILogger<ContainerMigration> logger)
+/// <summary>
+/// This class inherits from <see cref="BaseContainerMigration"/> and provides an implementation for Cosmos DB container migration operations.
+/// </summary>
+/// <param name="cosmosClient">The Cosmos client instance.</param>
+/// <param name="databaseId">The ID of the existing database containing the target container.</param>
+/// <param name="containerId">The ID of the existing target container.</param>
+/// <param name="logger">Optional logger instance. If not provided, a default logger will be created.</param>
+/// <exception cref="ArgumentNullException">Thrown if cosmosClient is null.</exception>
+/// <exception cref="ArgumentException">Thrown if databaseId or containerId is null or empty.</exception>
+public class ContainerMigration(
+    CosmosClient cosmosClient,
+    string databaseId,
+    string containerId,
+    ILogger<ContainerMigration>? logger = default)
     : BaseContainerMigration(cosmosClient, databaseId, containerId, logger)
 {
+
+    /// <inheritdoc/>
     public override async Task<IList<ExpandoObject>> GetItems(string query = "SELECT * FROM c")
     {
         double requestCharge = 0.0;
@@ -32,6 +47,7 @@ public class ContainerMigration(CosmosClient cosmosClient, string databaseId, st
         return items;
     }
 
+    /// <inheritdoc/>
     public override async Task SwitchToContainer(string containerId, string? databaseId = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(containerId);
@@ -42,6 +58,7 @@ public class ContainerMigration(CosmosClient cosmosClient, string databaseId, st
         _logger.LogInformation("Switching to container {ContainerId} and database {DatabaseId} is successful", containerId, databaseId);
     }
 
+    /// <inheritdoc/>
     public override async Task UpsertItems<T>(IList<T> items)
     {
         ArgumentNullException.ThrowIfNull(items);
@@ -56,6 +73,7 @@ public class ContainerMigration(CosmosClient cosmosClient, string databaseId, st
         _logger.LogInformation("{OperationName} with items count {Count} cost {Charge} RUs.", nameof(UpsertItems), items.Count, requestCharge);
     }
 
+    /// <inheritdoc/>
     public override async Task RemoveItemsByQuery(string query)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(query);
@@ -77,6 +95,7 @@ public class ContainerMigration(CosmosClient cosmosClient, string databaseId, st
         _logger.LogInformation("{OperationName} with items count {Count} cost {Charge} RUs.", nameof(RemoveItemsByQuery), items.Count, requestCharge);
     }
 
+    /// <inheritdoc/>
     public override async Task AddPropertyToItems(IList<ExpandoObject> items, string propertyPath, string propertyName, object value)
     {
         ArgumentNullException.ThrowIfNull(items);
@@ -100,6 +119,7 @@ public class ContainerMigration(CosmosClient cosmosClient, string databaseId, st
         _logger.LogInformation("{OperationName} with items count {Count} cost {Charge} RUs.", nameof(AddPropertyToItems), items.Count, requestCharge);
     }
 
+    /// <inheritdoc/>
     public override async Task AddPropertyToItems(IList<ExpandoObject> items, string propertyName, object value)
     {
         ArgumentNullException.ThrowIfNull(items);
@@ -121,6 +141,7 @@ public class ContainerMigration(CosmosClient cosmosClient, string databaseId, st
         _logger.LogInformation("{OperationName} with items count {Count} cost {Charge} RUs.", nameof(AddPropertyToItems), items.Count, requestCharge);
     }
 
+    /// <inheritdoc/>
     public override async Task RemovePropertyFromItems(IList<ExpandoObject> items, string propertyName)
     {
         ArgumentNullException.ThrowIfNull(items);
@@ -141,6 +162,7 @@ public class ContainerMigration(CosmosClient cosmosClient, string databaseId, st
         _logger.LogInformation("{OperationName} with items count {Count} cost {Charge} RUs.", nameof(RemovePropertyFromItems), items.Count, requestCharge);
     }
 
+    /// <inheritdoc/>
     public override async Task RemovePropertyFromItems(IList<ExpandoObject> items, string propertyPath, string propertyName)
     {
         ArgumentNullException.ThrowIfNull(items);

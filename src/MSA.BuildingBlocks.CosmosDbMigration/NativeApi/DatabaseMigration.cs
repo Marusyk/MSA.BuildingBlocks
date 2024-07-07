@@ -12,9 +12,23 @@ using System.Threading.Tasks;
 
 namespace MSA.BuildingBlocks.CosmosDbMigration;
 
-public class DatabaseMigration(CosmosClient cosmosClient, string databaseId, string containerId, ILogger<DatabaseMigration> logger)
+/// <summary>
+/// This class inherits from <see cref="BaseDatabaseMigration"/> and provides an implementation for Cosmos DB migration operations.
+/// </summary>
+/// <param name="cosmosClient">The Cosmos client instance.</param>
+/// <param name="databaseId">The ID of the existing database containing the target container.</param>
+/// <param name="containerId">The ID of the existing target container.</param>
+/// <param name="logger">Optional logger instance. If not provided, a default logger will be created.</param>
+/// <exception cref="ArgumentNullException">Thrown if cosmosClient is null.</exception>
+/// <exception cref="ArgumentException">Thrown if databaseId or containerId is null or empty.</exception>
+public class DatabaseMigration(
+    CosmosClient cosmosClient,
+    string databaseId,
+    string containerId,
+    ILogger<DatabaseMigration>? logger = default)
     : BaseDatabaseMigration(cosmosClient, databaseId, containerId, logger)
 {
+    /// <inheritdoc/>
     public override async Task CloneContainer(string containerId, string partitionKey)
     {
         ArgumentException.ThrowIfNullOrEmpty(containerId);
@@ -28,6 +42,7 @@ public class DatabaseMigration(CosmosClient cosmosClient, string databaseId, str
         _logger.LogInformation("{OperationName} with items count {Count} operation cost {Charge} RUs.", nameof(CloneContainer), items.Count, requestCharge);
     }
 
+    /// <inheritdoc/>
     public override async Task DeleteContainer()
     {
         ContainerResponse response = await _container.DeleteContainerAsync().ConfigureAwait(false);
@@ -35,6 +50,7 @@ public class DatabaseMigration(CosmosClient cosmosClient, string databaseId, str
         _logger.LogInformation("{OperationName} operation cost {Charge} RUs.", nameof(DeleteContainer), response.RequestCharge);
     }
 
+    /// <inheritdoc/>
     public override async Task CreateContainer(string containerId, string partitionKey)
     {
         ArgumentException.ThrowIfNullOrEmpty(containerId);
@@ -45,6 +61,7 @@ public class DatabaseMigration(CosmosClient cosmosClient, string databaseId, str
         _logger.LogInformation("{OperationName} operation cost {Charge} RUs.", nameof(CreateContainer), response.RequestCharge);
     }
 
+    /// <inheritdoc/>
     public override async Task RecreateContainerWithNewPartitionKey(string partitionKey)
     {
         ArgumentException.ThrowIfNullOrEmpty(partitionKey);
@@ -60,6 +77,7 @@ public class DatabaseMigration(CosmosClient cosmosClient, string databaseId, str
         _logger.LogInformation("{OperationName} with items count {Count} operation cost {Charge} RUs.", nameof(RecreateContainerWithNewPartitionKey), items.Count, requestCharge);
     }
 
+    /// <inheritdoc/>
     public override async Task ReplaceIndexingPolicy(
         Collection<IncludedPath>? includedPaths = null,
         Collection<ExcludedPath>? excludedPaths = null,
@@ -102,6 +120,7 @@ public class DatabaseMigration(CosmosClient cosmosClient, string databaseId, str
         _logger.LogInformation("{OperationName} operation cost {Charge} RUs.", nameof(ReplaceIndexingPolicy), response.RequestCharge);
     }
 
+    /// <inheritdoc/>
     public override async Task SwitchToContainer(string containerId, string? databaseId = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(containerId);
@@ -112,6 +131,7 @@ public class DatabaseMigration(CosmosClient cosmosClient, string databaseId, str
         _logger.LogInformation("Switching to container {ContainerId} and database {DatabaseId} is successful", containerId, databaseId);
     }
 
+    /// <inheritdoc/>
     public override async Task AddIndexingPolicy(
         Collection<IncludedPath>? includedPaths = null,
         Collection<ExcludedPath>? excludedPaths = null,
