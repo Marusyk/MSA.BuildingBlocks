@@ -1,135 +1,153 @@
+using System.Collections.ObjectModel;
+using System.Dynamic;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 using MSA.BuildingBlocks.CosmosDbMigration;
 using Newtonsoft.Json;
 
-Console.WriteLine("Testing migrations");
+Console.WriteLine("Sample migrations started.");
+
+#region Initialize db and variables for sample
+string databaseId = "TestDb";
+string containerId = "TestContainer1";
+CosmosClient cosmosClient = new("AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
+
+DatabaseResponse db = await cosmosClient.CreateDatabaseIfNotExistsAsync(databaseId);
+await db.Database
+    .DefineContainer(containerId, "/CountryCode")
+    .CreateIfNotExistsAsync();
 
 using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
+#endregion
 
-//BaseDatabaseMigration databaseMigration = new DatabaseMigration(
-//    new CosmosClient("AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw=="),
-//    "TestDb",
-//    "TestContainer1",
-//    factory.CreateLogger<DatabaseMigration>());
+#region Database migrations
+DatabaseMigration databaseMigration = new(
+    cosmosClient,
+    databaseId: databaseId,
+    containerId: containerId,
+    logger: factory.CreateLogger<DatabaseMigration>());
 
-////var response =  await migrationOperation.GetItems();
+Console.WriteLine("Creating container 'TestContainer2'");
+await databaseMigration.CreateContainer("TestContainer2", $"{nameof(TestClass.MyProperty2)}");
 
-////await migrationOperation.RecreateContainerWithNewPartitionKey("CountryCode");
+Console.WriteLine($"Recreating container 'TestContainer2' with partition key {nameof(TestClass.MyProperty)}");
+await databaseMigration.SwitchToContainer("TestContainer2");
+await databaseMigration.RecreateContainerWithNewPartitionKey($"{nameof(TestClass.MyProperty)}");
 
-////await databaseMigration.CloneContainer("TestContainer3", "id");
+Console.WriteLine("Clone container 'TestContainer2' as 'TestContainer3'");
+await databaseMigration.CloneContainer("TestContainer3", $"{nameof(TestClass.MyProperty)}");
 
-//Collection<IncludedPath> includedPathes = new()
-//{
-//    new IncludedPath
-//    {
-//        Path = "/FirstName/?"
-//    }
-//};
+Console.WriteLine("Delete container 'TestContainer3'");
+await databaseMigration.SwitchToContainer("TestContainer3");
+await databaseMigration.DeleteContainer();
 
-//Collection<ExcludedPath> excludedPathes = new()
-//{
-//    new ExcludedPath()
-//    {
-//        Path = "/*"
-//    }
-//};
+Console.WriteLine("Replace indexing policy to 'TestContainer2'");
+await databaseMigration.SwitchToContainer("TestContainer2");
+Collection<IncludedPath> includedPathes =
+[
+    new IncludedPath
+    {
+        Path = "/SomeField/?"
+    }
+];
 
-//var compositePathes = new Collection<Collection<CompositePath>>()
-//{
-//    new Collection<CompositePath>()
-//    {
-//        new CompositePath()
-//        {
-//            Path = "/FirstName",
-//            Order = CompositePathSortOrder.Ascending
-//        },
-//        new CompositePath()
-//        {
-//            Path = "/id",
-//            Order = CompositePathSortOrder.Ascending
-//        }
-//    }
-//};
+Collection<ExcludedPath> excludedPathes =
+[
+    new ExcludedPath()
+    {
+        Path = "/*"
+    }
+];
 
-//await databaseMigration.AddIndexingPolicy(includedPathes, excludedPathes, compositePathes);
+Collection<Collection<CompositePath>> compositePathes =
+[
+    new()
+    {
+        new CompositePath()
+        {
+            Path = "/SomeField",
+            Order = CompositePathSortOrder.Ascending
+        },
+        new CompositePath()
+        {
+            Path = "/id",
+            Order = CompositePathSortOrder.Ascending
+        }
+    }
+];
 
-//await databaseMigration.SwitchToContainer("Analysis", "BankPropositionsPredictor");
-//await databaseMigration.CloneContainer("Analysis2", "Suggestion");
+await databaseMigration.ReplaceIndexingPolicy(includedPathes, excludedPathes, compositePathes);
 
-BaseContainerMigration containerMigration = new ContainerMigration(
-    new CosmosClient("AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw=="),
-    "TestDb",
-    "TestContainer1",
+Console.WriteLine("Add indexing policy to 'TestContainer2'");
+includedPathes =
+[
+    new IncludedPath
+    {
+        Path = $"/{nameof(TestClass.MyProperty3)}/?"
+    }
+];
+await databaseMigration.AddIndexingPolicy(includedPathes);
+#endregion
+
+#region Container migrations
+ContainerMigration containerMigration = new(
+    cosmosClient,
+    databaseId,
+    containerId,
     factory.CreateLogger<ContainerMigration>());
 
-//var items = await containerMigration.GetItems();
+Console.WriteLine("Upload dummy data in 'TestContainer2'");
+IList<TestClass> dummyData = JsonConvert.DeserializeObject<IList<TestClass>>(File.ReadAllText(@"../../../DummyTestData/1_000_items.json"));
+await containerMigration.SwitchToContainer("TestContainer2");
+await containerMigration.UpsertItems(dummyData);
 
-//await containerMigration.UpsertItems<TestClass>(new List<TestClass>
-//{
-//    new TestClass
-//    {
-//        id = Guid.NewGuid().ToString(),
-//        MyProperty = 10002,
-//        MyProperty2 = 4,
-//        MyProperty3 = 3,
-//        CountryCode = "UA"
-//    },
-//    new TestClass
-//    {
-//        id = Guid.NewGuid().ToString(),
-//        MyProperty = 1,
-//        MyProperty2 = 2,
-//        MyProperty3 = 3,
-//        CountryCode = "FR"
-//    },
-//    new TestClass
-//    {
-//        id = Guid.NewGuid().ToString(),
-//        MyProperty = 1,
-//        MyProperty2 = 2,
-//        MyProperty3 = 3,
-//        CountryCode = "TR"
-//    }
-//});
+Console.WriteLine("Get all items by query");
+IList<ExpandoObject> items = await containerMigration.GetItems();
 
-//await containerMigration.UpsertItem<TestClass>(new TestClass
-//{
-//    id = Guid.NewGuid().ToString(),
-//    MyProperty = 10002,
-//    MyProperty2 = 1234,
-//    MyProperty3 = 3,
-//    CountryCode = "UA"
-//});
+Console.WriteLine("Add property MyProperty6 to all items with value 10");
+await containerMigration.AddPropertyToItems(items, "MyProperty6", 10);
 
-//await containerMigration.AddPropertyToItems(items, "InnerClass.SomeProp1", "SomeProp3", new { InterProp = "Some" });
-//await containerMigration.AddPropertyToItems(items, "MyProperty6", 10);
-//await containerMigration.RemovePropertyFromItems(items, "InnerClass.SomeProp1", "SomeProp3");
-//await containerMigration.RemovePropertyFromItems(items, "MyProperty6");
+Console.WriteLine("Add property InnerClass.SomeProp1 in InnerClass to all items");
+await containerMigration.AddPropertyToItems(items, "InnerClass2", new { SomeProp1 = new { SomeProp = "SMTH" } });
 
-await containerMigration.RemoveItemsByQuery("SELECT * FROM c WHERE c.CountryCode = \"AR\" and c.City = \"Necochea\"");
+Console.WriteLine("Add inner property SomeProp3 with value 'InterProp = Some' to TestClass.InnerClass");
+items = await containerMigration.GetItems();
+await containerMigration.AddPropertyToItems(items, "InnerClass2.SomeProp1", "SomeProp3", new { SomeProp = 10 });
 
-Console.ReadLine();
+Console.WriteLine("Remove property MyProperty6 from all items");
+await containerMigration.RemovePropertyFromItems(items, "MyProperty6");
 
+Console.WriteLine("Remove inner property SomeProp3 for class TestClass.InnerClass");
+await containerMigration.RemovePropertyFromItems(items, "InnerClass2.SomeProp1", "SomeProp3");
+
+Console.WriteLine("Remove items by query 'SELECT * FROM c WHERE c.MyProperty = 1'");
+await containerMigration.RemoveItemsByQuery("SELECT * FROM c WHERE c.MyProperty = 1");
+
+Console.WriteLine("Remove container 'TestContainer2'");
+await databaseMigration.DeleteContainer();
+#endregion 
+
+#region Classes used in migrations
 public class TestClass
 {
     [JsonProperty(PropertyName = "id")]
     public string id { get; set; }
-    public string someField { get; set; }
+    public string SomeField { get; set; }
     public int MyProperty { get; set; }
     public int MyProperty2 { get; set; }
     public int MyProperty3 { get; set; }
     public string CountryCode { get; set; }
 
     public TestInnerClass InnerClass { get; set; }
-}
 
-public class TestInnerClass
-{
-    public TestInner2Class SomeProp1 { get; set; }
-
-    public class TestInner2Class
+    public class TestInnerClass
     {
-        public int SomeProp { get; set; }
+        public TestInner2Class SomeProp1 { get; set; }
+
+        public class TestInner2Class
+        {
+            public int SomeProp { get; set; }
+        }
     }
 }
+#endregion

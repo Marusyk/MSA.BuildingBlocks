@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
@@ -51,8 +52,9 @@ public class ContainerMigration(
     public override async Task SwitchToContainer(string containerId, string? databaseId = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(containerId);
+        databaseId ??= _container.Database.Id;
 
-        _container = _cosmosClient.GetContainer(databaseId ?? _container.Database.Id, containerId);
+        _container = _cosmosClient.GetContainer(databaseId, containerId);
         _containerProperties = await _container.ReadContainerAsync().ConfigureAwait(false);
 
         _logger.LogInformation("Switching to container {ContainerId} and database {DatabaseId} is successful", containerId, databaseId);
@@ -84,11 +86,19 @@ public class ContainerMigration(
         foreach (ExpandoObject item in items)
         {
             string itemId = item.First(i => i.Key == "id").Value!.ToString()!;
-            string itemPartitionKey = item.First(i => i.Key == _containerProperties.PartitionKeyPath[1..]).Value!.ToString()!;
+            object itemPartitionKeyValue = item.First(i => i.Key == _containerProperties.PartitionKeyPath[1..]).Value!;
 
-            ResponseMessage response = await _container.DeleteItemStreamAsync(itemId, new(itemPartitionKey), new ItemRequestOptions { EnableContentResponseOnWrite = false });
-            _logger.LogInformation("Item with id {Id} and partition key {Key} is deleted.", itemId, itemPartitionKey);
+            ResponseMessage response = await _container.DeleteItemStreamAsync(itemId, GetPartitionKey(itemPartitionKeyValue), new ItemRequestOptions { EnableContentResponseOnWrite = false });
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("Item with id {Id} and partition key {PartitionKey} wasn't replaced due to Error: {Message}",
+                    itemId, itemPartitionKeyValue, response.ErrorMessage);
 
+                requestCharge += response.Headers.RequestCharge;
+                continue;
+            }
+
+            _logger.LogInformation("Item with id {Id} and partition key {Key} is deleted.", itemId, itemPartitionKeyValue);
             requestCharge += response.Headers.RequestCharge;
         }
 
@@ -187,7 +197,7 @@ public class ContainerMigration(
 
     private static object DivingToNestedObject(object obj, string[] pathParts)
     {
-        if (pathParts.Length == 1)
+        if (pathParts.Length == 0)
         {
             return obj;
         }
@@ -201,7 +211,7 @@ public class ContainerMigration(
         return DivingToNestedObject(nestedObject[nextPart], pathParts.Skip(1).ToArray());
     }
 
-    private Task<ResponseMessage> ReplaceItem(ExpandoObject @object)
+    private async Task<ResponseMessage> ReplaceItem(ExpandoObject @object)
     {
         ArgumentNullException.ThrowIfNull(@object);
 
@@ -209,11 +219,27 @@ public class ContainerMigration(
             ?? throw new InvalidOperationException("Id property is not presented in the item.");
 
         string partitionKeyPath = _containerProperties.PartitionKeyPath[1..];
-        string partitionKeyValue = @object.FirstOrDefault(n => n.Key == partitionKeyPath).Value?.ToString()
+        object partitionKeyValue = @object.FirstOrDefault(n => n.Key == partitionKeyPath).Value
             ?? throw new InvalidOperationException($"Item with partition key {partitionKeyPath} is not presented.");
 
-        return _container.ReplaceItemStreamAsync(GetItemStream(@object), id, new PartitionKey(partitionKeyValue));
+        ResponseMessage response = await _container.ReplaceItemStreamAsync(GetItemStream(@object), id, GetPartitionKey(partitionKeyValue));
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogError("Item with id {Id} and partition key {PartitionKey} wasn't replaced due to Error: {Message}",
+                id, partitionKeyValue, response.ErrorMessage);
+        }
+        return response;
     }
+
+    private static PartitionKey GetPartitionKey(object partitionKeyObject) =>
+         partitionKeyObject switch
+         {
+             string value => new PartitionKey(value),
+             long value => new PartitionKey(value),
+             double value => new PartitionKey(value),
+             byte value => new PartitionKey(value),
+             _ => throw new ArgumentException($"Unsupported partition key type {partitionKeyObject.GetType()}.")
+         };
 
     private static MemoryStream GetItemStream(ExpandoObject item)
     {

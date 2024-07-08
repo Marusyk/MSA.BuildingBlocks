@@ -124,8 +124,9 @@ public class DatabaseMigration(
     public override async Task SwitchToContainer(string containerId, string? databaseId = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(containerId);
+        databaseId ??= _container.Database.Id;
 
-        _container = _cosmosClient.GetContainer(databaseId ?? _container.Database.Id, containerId);
+        _container = _cosmosClient.GetContainer(databaseId, containerId);
         _containerProperties = await _container.ReadContainerAsync().ConfigureAwait(false);
 
         _logger.LogInformation("Switching to container {ContainerId} and database {DatabaseId} is successful", containerId, databaseId);
