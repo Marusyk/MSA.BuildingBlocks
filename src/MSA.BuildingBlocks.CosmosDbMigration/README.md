@@ -62,7 +62,6 @@ DeleteContainer| Deletes the target container.|	- None|
 |ReplaceIndexingPolicy|	Replaces the existing indexing policy for the target container.|	- includedPaths: Collection of included paths for indexing.<br> - excludedPaths: Collection of excluded paths for indexing.<br> - compositePaths: Collection of composite paths for indexing.|
 |SwitchToContainer|	Switches the target container to a different container within the Cosmos DB.|	- containerId: The ID of the new target container.<br> - databaseId: ID of the database containing the new target container.|
 
-
 ## Limitations
 1. Target database and container should exist before any operation.
 2. AddPropertyToItems (Nested Property) operation should be provided to a property which is not null.
