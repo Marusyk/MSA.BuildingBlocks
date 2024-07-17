@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
@@ -15,19 +14,23 @@ namespace MSA.BuildingBlocks.CosmosDbMigration;
 /// <summary>
 /// This class inherits from <see cref="BaseContainerMigration"/> and provides an implementation for Cosmos DB container migration operations.
 /// </summary>
-/// <param name="cosmosClient">The Cosmos client instance.</param>
-/// <param name="databaseId">The ID of the existing database containing the target container.</param>
-/// <param name="containerId">The ID of the existing target container.</param>
-/// <param name="logger">Optional logger instance. If not provided, a default logger will be created.</param>
-/// <exception cref="ArgumentNullException">Thrown if cosmosClient is null.</exception>
-/// <exception cref="ArgumentException">Thrown if databaseId or containerId is null or empty.</exception>
-public class ContainerMigration(
+public class ContainerMigration : BaseContainerMigration
+{
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ContainerMigration"/> class.
+    /// </summary>
+    /// <param name="cosmosClient">The Cosmos client instance.</param>
+    /// <param name="databaseId">The ID of the existing database containing the target container.</param>
+    /// <param name="containerId">The ID of the existing target container.</param>
+    /// <param name="logger">Optional logger instance. If not provided, a default logger will be created.</param>
+    /// <exception cref="ArgumentNullException">Thrown if cosmosClient is null.</exception>
+    /// <exception cref="ArgumentException">Thrown if databaseId or containerId is null or empty.</exception>
+    public ContainerMigration(
     CosmosClient cosmosClient,
     string databaseId,
     string containerId,
-    ILogger<ContainerMigration>? logger = default)
-    : BaseContainerMigration(cosmosClient, databaseId, containerId, logger)
-{
+    ILogger<ContainerMigration>? logger = default) : base(cosmosClient, databaseId, containerId, logger)
+    { }
 
     /// <inheritdoc/>
     public override async Task<IList<ExpandoObject>> GetItems(string query = "SELECT * FROM c")

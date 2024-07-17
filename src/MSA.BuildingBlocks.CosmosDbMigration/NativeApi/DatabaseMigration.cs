@@ -15,19 +15,27 @@ namespace MSA.BuildingBlocks.CosmosDbMigration;
 /// <summary>
 /// This class inherits from <see cref="BaseDatabaseMigration"/> and provides an implementation for Cosmos DB migration operations.
 /// </summary>
-/// <param name="cosmosClient">The Cosmos client instance.</param>
-/// <param name="databaseId">The ID of the existing database containing the target container.</param>
-/// <param name="containerId">The ID of the existing target container.</param>
-/// <param name="logger">Optional logger instance. If not provided, a default logger will be created.</param>
 /// <exception cref="ArgumentNullException">Thrown if cosmosClient is null.</exception>
 /// <exception cref="ArgumentException">Thrown if databaseId or containerId is null or empty.</exception>
-public class DatabaseMigration(
+public class DatabaseMigration : BaseDatabaseMigration
+{
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DatabaseMigration"/> class.
+    /// </summary>
+    /// <param name="cosmosClient">The Cosmos client instance.</param>
+    /// <param name="databaseId">The ID of the existing database containing the target container.</param>
+    /// <param name="containerId">The ID of the existing target container.</param>
+    /// <param name="logger">Optional logger instance. If not provided, a default logger will be created.</param>
+    /// <exception cref="ArgumentNullException">Thrown if cosmosClient is null.</exception>
+    /// <exception cref="ArgumentException">Thrown if databaseId or containerId is null or empty.</exception>
+    public DatabaseMigration(
     CosmosClient cosmosClient,
     string databaseId,
     string containerId,
-    ILogger<DatabaseMigration>? logger = default)
-    : BaseDatabaseMigration(cosmosClient, databaseId, containerId, logger)
-{
+    ILogger<DatabaseMigration>? logger = default) : base(cosmosClient, databaseId, containerId, logger)
+    {
+    }
+
     /// <inheritdoc/>
     public override async Task CloneContainer(string containerId, string partitionKey)
     {

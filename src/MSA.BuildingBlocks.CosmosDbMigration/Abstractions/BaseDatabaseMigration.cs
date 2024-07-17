@@ -19,7 +19,7 @@ public abstract class BaseDatabaseMigration
     protected ILogger<BaseDatabaseMigration> _logger;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="BaseDatabaseMigration"/> class.
+    /// Initializes a new instance of the <see cref="BaseDatabaseMigration"/> derived classes.
     /// </summary>
     /// <param name="cosmosClient">The Cosmos client instance.</param>
     /// <param name="databaseId">The ID of the existing database containing the target container.</param>
