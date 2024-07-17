@@ -11,9 +11,28 @@ using Newtonsoft.Json;
 
 namespace MSA.BuildingBlocks.CosmosDbMigration;
 
-public class ContainerMigration(CosmosClient cosmosClient, string databaseId, string containerId, ILogger<ContainerMigration> logger)
-    : BaseContainerMigration(cosmosClient, databaseId, containerId, logger)
+/// <summary>
+/// This class inherits from <see cref="BaseContainerMigration"/> and provides an implementation for Cosmos DB container migration operations.
+/// </summary>
+public class ContainerMigration : BaseContainerMigration
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ContainerMigration"/> class.
+    /// </summary>
+    /// <param name="cosmosClient">The Cosmos client instance.</param>
+    /// <param name="databaseId">The ID of the existing database containing the target container.</param>
+    /// <param name="containerId">The ID of the existing target container.</param>
+    /// <param name="logger">Optional logger instance. If not provided, a default logger will be created.</param>
+    /// <exception cref="ArgumentNullException">Thrown if cosmosClient is null.</exception>
+    /// <exception cref="ArgumentException">Thrown if databaseId or containerId is null or empty.</exception>
+    public ContainerMigration(
+    CosmosClient cosmosClient,
+    string databaseId,
+    string containerId,
+    ILogger<ContainerMigration>? logger = default) : base(cosmosClient, databaseId, containerId, logger)
+    { }
+
+    /// <inheritdoc/>
     public override async Task<IList<ExpandoObject>> GetItems(string query = "SELECT * FROM c")
     {
         double requestCharge = 0.0;
@@ -32,16 +51,19 @@ public class ContainerMigration(CosmosClient cosmosClient, string databaseId, st
         return items;
     }
 
+    /// <inheritdoc/>
     public override async Task SwitchToContainer(string containerId, string? databaseId = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(containerId);
+        databaseId ??= _container.Database.Id;
 
-        _container = _cosmosClient.GetContainer(databaseId ?? _container.Database.Id, containerId);
+        _container = _cosmosClient.GetContainer(databaseId, containerId);
         _containerProperties = await _container.ReadContainerAsync().ConfigureAwait(false);
 
         _logger.LogInformation("Switching to container {ContainerId} and database {DatabaseId} is successful", containerId, databaseId);
     }
 
+    /// <inheritdoc/>
     public override async Task UpsertItems<T>(IList<T> items)
     {
         ArgumentNullException.ThrowIfNull(items);
@@ -56,6 +78,7 @@ public class ContainerMigration(CosmosClient cosmosClient, string databaseId, st
         _logger.LogInformation("{OperationName} with items count {Count} cost {Charge} RUs.", nameof(UpsertItems), items.Count, requestCharge);
     }
 
+    /// <inheritdoc/>
     public override async Task RemoveItemsByQuery(string query)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(query);
@@ -66,17 +89,26 @@ public class ContainerMigration(CosmosClient cosmosClient, string databaseId, st
         foreach (ExpandoObject item in items)
         {
             string itemId = item.First(i => i.Key == "id").Value!.ToString()!;
-            string itemPartitionKey = item.First(i => i.Key == _containerProperties.PartitionKeyPath[1..]).Value!.ToString()!;
+            object itemPartitionKeyValue = item.First(i => i.Key == _containerProperties.PartitionKeyPath[1..]).Value!;
 
-            ResponseMessage response = await _container.DeleteItemStreamAsync(itemId, new(itemPartitionKey), new ItemRequestOptions { EnableContentResponseOnWrite = false });
-            _logger.LogInformation("Item with id {Id} and partition key {Key} is deleted.", itemId, itemPartitionKey);
+            ResponseMessage response = await _container.DeleteItemStreamAsync(itemId, GetPartitionKey(itemPartitionKeyValue), new ItemRequestOptions { EnableContentResponseOnWrite = false });
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("Item with id {Id} and partition key {PartitionKey} wasn't replaced due to Error: {Message}",
+                    itemId, itemPartitionKeyValue, response.ErrorMessage);
 
+                requestCharge += response.Headers.RequestCharge;
+                continue;
+            }
+
+            _logger.LogInformation("Item with id {Id} and partition key {Key} is deleted.", itemId, itemPartitionKeyValue);
             requestCharge += response.Headers.RequestCharge;
         }
 
         _logger.LogInformation("{OperationName} with items count {Count} cost {Charge} RUs.", nameof(RemoveItemsByQuery), items.Count, requestCharge);
     }
 
+    /// <inheritdoc/>
     public override async Task AddPropertyToItems(IList<ExpandoObject> items, string propertyPath, string propertyName, object value)
     {
         ArgumentNullException.ThrowIfNull(items);
@@ -100,6 +132,7 @@ public class ContainerMigration(CosmosClient cosmosClient, string databaseId, st
         _logger.LogInformation("{OperationName} with items count {Count} cost {Charge} RUs.", nameof(AddPropertyToItems), items.Count, requestCharge);
     }
 
+    /// <inheritdoc/>
     public override async Task AddPropertyToItems(IList<ExpandoObject> items, string propertyName, object value)
     {
         ArgumentNullException.ThrowIfNull(items);
@@ -121,6 +154,7 @@ public class ContainerMigration(CosmosClient cosmosClient, string databaseId, st
         _logger.LogInformation("{OperationName} with items count {Count} cost {Charge} RUs.", nameof(AddPropertyToItems), items.Count, requestCharge);
     }
 
+    /// <inheritdoc/>
     public override async Task RemovePropertyFromItems(IList<ExpandoObject> items, string propertyName)
     {
         ArgumentNullException.ThrowIfNull(items);
@@ -141,6 +175,7 @@ public class ContainerMigration(CosmosClient cosmosClient, string databaseId, st
         _logger.LogInformation("{OperationName} with items count {Count} cost {Charge} RUs.", nameof(RemovePropertyFromItems), items.Count, requestCharge);
     }
 
+    /// <inheritdoc/>
     public override async Task RemovePropertyFromItems(IList<ExpandoObject> items, string propertyPath, string propertyName)
     {
         ArgumentNullException.ThrowIfNull(items);
@@ -165,7 +200,7 @@ public class ContainerMigration(CosmosClient cosmosClient, string databaseId, st
 
     private static object DivingToNestedObject(object obj, string[] pathParts)
     {
-        if (pathParts.Length == 1)
+        if (pathParts.Length == 0)
         {
             return obj;
         }
@@ -179,7 +214,7 @@ public class ContainerMigration(CosmosClient cosmosClient, string databaseId, st
         return DivingToNestedObject(nestedObject[nextPart], pathParts.Skip(1).ToArray());
     }
 
-    private Task<ResponseMessage> ReplaceItem(ExpandoObject @object)
+    private async Task<ResponseMessage> ReplaceItem(ExpandoObject @object)
     {
         ArgumentNullException.ThrowIfNull(@object);
 
@@ -187,11 +222,27 @@ public class ContainerMigration(CosmosClient cosmosClient, string databaseId, st
             ?? throw new InvalidOperationException("Id property is not presented in the item.");
 
         string partitionKeyPath = _containerProperties.PartitionKeyPath[1..];
-        string partitionKeyValue = @object.FirstOrDefault(n => n.Key == partitionKeyPath).Value?.ToString()
+        object partitionKeyValue = @object.FirstOrDefault(n => n.Key == partitionKeyPath).Value
             ?? throw new InvalidOperationException($"Item with partition key {partitionKeyPath} is not presented.");
 
-        return _container.ReplaceItemStreamAsync(GetItemStream(@object), id, new PartitionKey(partitionKeyValue));
+        ResponseMessage response = await _container.ReplaceItemStreamAsync(GetItemStream(@object), id, GetPartitionKey(partitionKeyValue));
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogError("Item with id {Id} and partition key {PartitionKey} wasn't replaced due to Error: {Message}",
+                id, partitionKeyValue, response.ErrorMessage);
+        }
+        return response;
     }
+
+    private static PartitionKey GetPartitionKey(object partitionKeyObject) =>
+         partitionKeyObject switch
+         {
+             string value => new PartitionKey(value),
+             long value => new PartitionKey(value),
+             double value => new PartitionKey(value),
+             byte value => new PartitionKey(value),
+             _ => throw new ArgumentException($"Unsupported partition key type {partitionKeyObject.GetType()}.")
+         };
 
     private static MemoryStream GetItemStream(ExpandoObject item)
     {
