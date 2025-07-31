@@ -14,7 +14,6 @@ public abstract class BaseContainerMigration
 {
     protected CosmosClient _cosmosClient;
     protected Container _container;
-    protected ContainerProperties _containerProperties;
     protected ILogger<BaseContainerMigration> _logger;
 
     /// <summary>
@@ -38,7 +37,6 @@ public abstract class BaseContainerMigration
 
         _cosmosClient = cosmosClient;
         _container = cosmosClient.GetContainer(databaseId, containerId);
-        _containerProperties = _container.ReadContainerAsync().GetAwaiter().GetResult();
         _logger = logger ?? new LoggerFactory().CreateLogger<BaseContainerMigration>();
     }
 

@@ -91,7 +91,7 @@ public class DatabaseMigration : BaseDatabaseMigration
         Collection<ExcludedPath>? excludedPaths = null,
         Collection<Collection<CompositePath>>? compositePaths = null)
     {
-        ContainerProperties containerProperties = new(_containerProperties.Id, _containerProperties.PartitionKeyPath);
+        ContainerProperties containerProperties = await _container.ReadContainerAsync().ConfigureAwait(false);
 
         if (includedPaths is not null)
         {
@@ -129,15 +129,16 @@ public class DatabaseMigration : BaseDatabaseMigration
     }
 
     /// <inheritdoc/>
-    public override async Task SwitchToContainer(string containerId, string? databaseId = null)
+    public override Task SwitchToContainer(string containerId, string? databaseId = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(containerId);
         databaseId ??= _container.Database.Id;
 
         _container = _cosmosClient.GetContainer(databaseId, containerId);
-        _containerProperties = await _container.ReadContainerAsync().ConfigureAwait(false);
 
         _logger.LogInformation("Switching to container {ContainerId} and database {DatabaseId} is successful", containerId, databaseId);
+
+        return Task.CompletedTask;
     }
 
     /// <inheritdoc/>
@@ -146,19 +147,20 @@ public class DatabaseMigration : BaseDatabaseMigration
         Collection<ExcludedPath>? excludedPaths = null,
         Collection<Collection<CompositePath>>? compositePaths = null)
     {
-        bool indexesChanged = false;
+        ContainerProperties containerProperties = await _container.ReadContainerAsync().ConfigureAwait(false);
 
+        bool indexesChanged = false;
         if (includedPaths is not null)
         {
             foreach (IncludedPath includedPath in includedPaths)
             {
-                if (_containerProperties.IndexingPolicy.IncludedPaths.FirstOrDefault(i => i.Path == includedPath.Path) is not null)
+                if (containerProperties.IndexingPolicy.IncludedPaths.FirstOrDefault(i => i.Path == includedPath.Path) is not null)
                 {
                     continue;
                 }
 
                 indexesChanged = true;
-                _containerProperties.IndexingPolicy.IncludedPaths.Add(includedPath);
+                containerProperties.IndexingPolicy.IncludedPaths.Add(includedPath);
             }
         }
 
@@ -166,19 +168,19 @@ public class DatabaseMigration : BaseDatabaseMigration
         {
             foreach (ExcludedPath excludedPath in excludedPaths)
             {
-                if (_containerProperties.IndexingPolicy.ExcludedPaths.FirstOrDefault(i => i.Path == excludedPath.Path) is not null)
+                if (containerProperties.IndexingPolicy.ExcludedPaths.FirstOrDefault(i => i.Path == excludedPath.Path) is not null)
                 {
                     continue;
                 }
 
                 indexesChanged = true;
-                _containerProperties.IndexingPolicy.ExcludedPaths.Add(excludedPath);
+                containerProperties.IndexingPolicy.ExcludedPaths.Add(excludedPath);
             }
         }
 
         if (compositePaths is not null)
         {
-            List<Collection<CompositePath>> existingCompositeIndexes = [.. _containerProperties.IndexingPolicy.CompositeIndexes];
+            List<Collection<CompositePath>> existingCompositeIndexes = [.. containerProperties.IndexingPolicy.CompositeIndexes];
             foreach (Collection<CompositePath> compositePath in compositePaths)
             {
                 bool indexesExist = false;
@@ -195,24 +197,24 @@ public class DatabaseMigration : BaseDatabaseMigration
                 if (!indexesExist)
                 {
                     indexesChanged = true;
-                    _containerProperties.IndexingPolicy.CompositeIndexes.Add(compositePath);
+                    containerProperties.IndexingPolicy.CompositeIndexes.Add(compositePath);
                 }
             }
 
-            if (_containerProperties.IndexingPolicy.CompositeIndexes.Count is 0)
+            if (containerProperties.IndexingPolicy.CompositeIndexes.Count is 0)
             {
                 indexesChanged = true;
 
                 foreach (Collection<CompositePath> compositePath in compositePaths)
                 {
-                    _containerProperties.IndexingPolicy.CompositeIndexes.Add(compositePath);
+                    containerProperties.IndexingPolicy.CompositeIndexes.Add(compositePath);
                 }
             }
         }
 
         if (indexesChanged)
         {
-            ContainerResponse response = await _container.ReplaceContainerAsync(_containerProperties).ConfigureAwait(false);
+            ContainerResponse response = await _container.ReplaceContainerAsync(containerProperties).ConfigureAwait(false);
 
             _logger.LogInformation("{OperationName} operation cost {Charge} RUs.", nameof(AddIndexingPolicy), response.RequestCharge);
             return;

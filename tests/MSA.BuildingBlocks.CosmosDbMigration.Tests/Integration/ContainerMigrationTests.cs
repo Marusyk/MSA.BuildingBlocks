@@ -1,24 +1,22 @@
 using System.Dynamic;
-using MSA.BuildingBlocks.CosmosDbMigration.Tests;
-using MSA.BuildingBlocks.CosmosDbMigration.Tests.Integration;
 using Xunit;
 
-namespace MSA.BuildingBlocks.CosmosDbContainerMigration.Tests;
+namespace MSA.BuildingBlocks.CosmosDbMigration.Tests.Integration;
 
 public sealed class ContainerContainerMigrationTests : IClassFixture<ContainerMigrationTestFixture>
 {
-    private readonly ContainerMigrationTestFixture _containerMigrationTestFixture;
+    private readonly ContainerMigrationTestFixture _fixture;
 
-    public ContainerContainerMigrationTests(ContainerMigrationTestFixture containerMigrationTestFixture)
+    public ContainerContainerMigrationTests(ContainerMigrationTestFixture fixture)
     {
-        _containerMigrationTestFixture = containerMigrationTestFixture;
+        _fixture = fixture;
     }
 
     [Fact]
     public async Task GetItems_Should_Return_Initially_Inserted_Items()
     {
         // Arrange
-        List<ExpandoObject> initialItems = _containerMigrationTestFixture.InitialItems;
+        List<ExpandoObject> initialItems = _fixture.InitialItems;
 
         await using ContainerMigrationTestContext context
             = await ContainerMigrationTestContext.CreateAsync(initialItems);
@@ -34,7 +32,7 @@ public sealed class ContainerContainerMigrationTests : IClassFixture<ContainerMi
     public async Task UpsertItems_Should_Insert_Initial_Items()
     {
         // Arrange
-        List<ExpandoObject> initialItems = _containerMigrationTestFixture.InitialItems;
+        List<ExpandoObject> initialItems = _fixture.InitialItems;
 
         await using ContainerMigrationTestContext context
             = await ContainerMigrationTestContext.CreateAsync([]);
@@ -63,7 +61,7 @@ public sealed class ContainerContainerMigrationTests : IClassFixture<ContainerMi
     public async Task RemoveItemsByQuery_Should_Delete_All_Matching_Items()
     {
         // Arrange
-        List<ExpandoObject> initialItems = _containerMigrationTestFixture.InitialItems;
+        List<ExpandoObject> initialItems = _fixture.InitialItems;
 
         await using ContainerMigrationTestContext context
             = await ContainerMigrationTestContext.CreateAsync(initialItems);
@@ -85,7 +83,7 @@ public sealed class ContainerContainerMigrationTests : IClassFixture<ContainerMi
     public async Task AddPropertyToItems_Should_Add_Property_To_The_Root()
     {
         // Arrange
-        List<ExpandoObject> initialItems = _containerMigrationTestFixture.InitialItems;
+        List<ExpandoObject> initialItems = _fixture.InitialItems;
 
         await using ContainerMigrationTestContext context
             = await ContainerMigrationTestContext.CreateAsync(initialItems);
@@ -116,7 +114,7 @@ public sealed class ContainerContainerMigrationTests : IClassFixture<ContainerMi
     public async Task AddPropertyToItems_Should_Add_Nested_Property_To_The_Existing_Root_Property()
     {
         // Arrange
-        List<ExpandoObject> initialItems = _containerMigrationTestFixture.InitialItems;
+        List<ExpandoObject> initialItems = _fixture.InitialItems;
 
         await using ContainerMigrationTestContext context
             = await ContainerMigrationTestContext.CreateAsync(initialItems);
@@ -149,7 +147,7 @@ public sealed class ContainerContainerMigrationTests : IClassFixture<ContainerMi
     public async Task RemovePropertyFromItems_Should_Remove_Root_Property()
     {
         // Arrange
-        List<ExpandoObject> initialItems = _containerMigrationTestFixture.InitialItems;
+        List<ExpandoObject> initialItems = _fixture.InitialItems;
 
         await using ContainerMigrationTestContext context
             = await ContainerMigrationTestContext.CreateAsync(initialItems);
@@ -180,7 +178,7 @@ public sealed class ContainerContainerMigrationTests : IClassFixture<ContainerMi
     public async Task RemovePropertyFromItems_Should_Remove_Nested_Property_From_The_Existing_Root_Property()
     {
         // Arrange
-        List<ExpandoObject> initialItems = _containerMigrationTestFixture.InitialItems;
+        List<ExpandoObject> initialItems = _fixture.InitialItems;
 
         await using ContainerMigrationTestContext context
             = await ContainerMigrationTestContext.CreateAsync(initialItems);
@@ -209,7 +207,7 @@ public sealed class ContainerContainerMigrationTests : IClassFixture<ContainerMi
     }
 
     private static IDictionary<string, object> ToDictionary(ExpandoObject obj) =>
-        (IDictionary<string, object>)obj;
+        obj;
 
     private static IDictionary<string, object> GetNestedDictionary(ExpandoObject root, string path)
     {

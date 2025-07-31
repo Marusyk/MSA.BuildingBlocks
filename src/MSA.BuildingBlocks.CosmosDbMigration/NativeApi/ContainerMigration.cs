@@ -52,15 +52,15 @@ public class ContainerMigration : BaseContainerMigration
     }
 
     /// <inheritdoc/>
-    public override async Task SwitchToContainer(string containerId, string? databaseId = null)
+    public override Task SwitchToContainer(string containerId, string? databaseId = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(containerId);
         databaseId ??= _container.Database.Id;
 
         _container = _cosmosClient.GetContainer(databaseId, containerId);
-        _containerProperties = await _container.ReadContainerAsync().ConfigureAwait(false);
 
         _logger.LogInformation("Switching to container {ContainerId} and database {DatabaseId} is successful", containerId, databaseId);
+        return Task.CompletedTask;
     }
 
     /// <inheritdoc/>
@@ -86,10 +86,11 @@ public class ContainerMigration : BaseContainerMigration
         IList<ExpandoObject> items = await GetItems(query);
         double requestCharge = 0.0;
 
+        ContainerProperties containerProperties = await _container.ReadContainerAsync().ConfigureAwait(false);
         foreach (ExpandoObject item in items)
         {
             string itemId = item.First(i => i.Key == "id").Value!.ToString()!;
-            object itemPartitionKeyValue = item.First(i => i.Key == _containerProperties.PartitionKeyPath[1..]).Value!;
+            object itemPartitionKeyValue = item.First(i => i.Key == containerProperties.PartitionKeyPath[1..]).Value!;
 
             ResponseMessage response = await _container.DeleteItemStreamAsync(itemId, GetPartitionKey(itemPartitionKeyValue), new ItemRequestOptions { EnableContentResponseOnWrite = false });
             if (!response.IsSuccessStatusCode)
@@ -221,7 +222,8 @@ public class ContainerMigration : BaseContainerMigration
         string id = @object.FirstOrDefault(n => n.Key == "id").Value?.ToString()
             ?? throw new InvalidOperationException("Id property is not presented in the item.");
 
-        string partitionKeyPath = _containerProperties.PartitionKeyPath[1..];
+        ContainerProperties containerProperties = await _container.ReadContainerAsync().ConfigureAwait(false);
+        string partitionKeyPath = containerProperties.PartitionKeyPath[1..];
         object partitionKeyValue = @object.FirstOrDefault(n => n.Key == partitionKeyPath).Value
             ?? throw new InvalidOperationException($"Item with partition key {partitionKeyPath} is not presented.");
 
