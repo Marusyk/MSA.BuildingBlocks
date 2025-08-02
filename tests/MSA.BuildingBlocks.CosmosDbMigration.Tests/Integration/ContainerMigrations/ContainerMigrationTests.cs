@@ -1,16 +1,12 @@
 using System.Dynamic;
 using Xunit;
 
-namespace MSA.BuildingBlocks.CosmosDbMigration.Tests.Integration;
+namespace MSA.BuildingBlocks.CosmosDbMigration.Tests.Integration.ContainerMigrations;
 
-public sealed class ContainerContainerMigrationTests : IClassFixture<ContainerMigrationTestFixture>
+public sealed class ContainerMigrationTests(MigrationTestFixture fixture)
+    : IClassFixture<MigrationTestFixture>
 {
-    private readonly ContainerMigrationTestFixture _fixture;
-
-    public ContainerContainerMigrationTests(ContainerMigrationTestFixture fixture)
-    {
-        _fixture = fixture;
-    }
+    private readonly MigrationTestFixture _fixture = fixture;
 
     [Fact]
     public async Task GetItems_Should_Return_Initially_Inserted_Items()
@@ -18,11 +14,13 @@ public sealed class ContainerContainerMigrationTests : IClassFixture<ContainerMi
         // Arrange
         List<ExpandoObject> initialItems = _fixture.InitialItems;
 
-        await using ContainerMigrationTestContext context
-            = await ContainerMigrationTestContext.CreateAsync(initialItems);
+        await using MigrationTestContext<ContainerMigration> context
+            = await MigrationTestContext<ContainerMigration>.CreateAsync(
+                (client, db, container, logger) => new ContainerMigration(client, db, container, logger),
+                initialItems);
 
         // Act
-        IList<ExpandoObject> actualItems = await context.ContainerMigration.GetItems();
+        IList<ExpandoObject> actualItems = await context.Migration.GetItems();
 
         // Assert
         Assert.Equal(initialItems.Count, actualItems.Count);
@@ -34,14 +32,16 @@ public sealed class ContainerContainerMigrationTests : IClassFixture<ContainerMi
         // Arrange
         List<ExpandoObject> initialItems = _fixture.InitialItems;
 
-        await using ContainerMigrationTestContext context
-            = await ContainerMigrationTestContext.CreateAsync([]);
+        await using MigrationTestContext<ContainerMigration> context
+            = await MigrationTestContext<ContainerMigration>.CreateAsync(
+                (client, db, container, logger) => new ContainerMigration(client, db, container, logger),
+                seedItems: []);
 
         // Act
-        await context.ContainerMigration.UpsertItems(initialItems);
+        await context.Migration.UpsertItems(initialItems);
 
         // Assert
-        IList<ExpandoObject> actualItems = await context.ContainerMigration.GetItems();
+        IList<ExpandoObject> actualItems = await context.Migration.GetItems();
         Assert.Equal(initialItems.Count, actualItems.Count);
 
         foreach (ExpandoObject item in initialItems)
@@ -63,19 +63,21 @@ public sealed class ContainerContainerMigrationTests : IClassFixture<ContainerMi
         // Arrange
         List<ExpandoObject> initialItems = _fixture.InitialItems;
 
-        await using ContainerMigrationTestContext context
-            = await ContainerMigrationTestContext.CreateAsync(initialItems);
+        await using MigrationTestContext<ContainerMigration> context
+            = await MigrationTestContext<ContainerMigration>.CreateAsync(
+                (client, db, container, logger) => new ContainerMigration(client, db, container, logger),
+                initialItems);
 
         string query = "SELECT * FROM c WHERE c.SomeField = 'SomeField'";
 
-        IList<ExpandoObject> currentItems = await context.ContainerMigration.GetItems(query);
+        IList<ExpandoObject> currentItems = await context.Migration.GetItems(query);
         Assert.NotEmpty(currentItems);
 
         // Act
-        await context.ContainerMigration.RemoveItemsByQuery(query);
+        await context.Migration.RemoveItemsByQuery(query);
 
         // Assert
-        IList<ExpandoObject> remainingItems = await context.ContainerMigration.GetItems(query);
+        IList<ExpandoObject> remainingItems = await context.Migration.GetItems(query);
         Assert.Empty(remainingItems);
     }
 
@@ -85,23 +87,25 @@ public sealed class ContainerContainerMigrationTests : IClassFixture<ContainerMi
         // Arrange
         List<ExpandoObject> initialItems = _fixture.InitialItems;
 
-        await using ContainerMigrationTestContext context
-            = await ContainerMigrationTestContext.CreateAsync(initialItems);
+        await using MigrationTestContext<ContainerMigration> context
+            = await MigrationTestContext<ContainerMigration>.CreateAsync(
+                (client, db, container, logger) => new ContainerMigration(client, db, container, logger),
+                initialItems);
 
         string propertyName = "status";
         string value = "active";
 
         string query = $"SELECT * FROM c WHERE c.{propertyName} = '{value}'";
-        IList<ExpandoObject> currentItems = await context.ContainerMigration.GetItems(query);
+        IList<ExpandoObject> currentItems = await context.Migration.GetItems(query);
         Assert.Empty(currentItems);
 
-        IList<ExpandoObject> items = await context.ContainerMigration.GetItems();
+        IList<ExpandoObject> items = await context.Migration.GetItems();
 
         // Act
-        await context.ContainerMigration.AddPropertyToItems(items, propertyName, value);
+        await context.Migration.AddPropertyToItems(items, propertyName, value);
 
         // Assert
-        IList<ExpandoObject> updatedItems = await context.ContainerMigration.GetItems();
+        IList<ExpandoObject> updatedItems = await context.Migration.GetItems();
         foreach (ExpandoObject item in updatedItems)
         {
             IDictionary<string, object> dict = ToDictionary(item);
@@ -116,25 +120,27 @@ public sealed class ContainerContainerMigrationTests : IClassFixture<ContainerMi
         // Arrange
         List<ExpandoObject> initialItems = _fixture.InitialItems;
 
-        await using ContainerMigrationTestContext context
-            = await ContainerMigrationTestContext.CreateAsync(initialItems);
+        await using MigrationTestContext<ContainerMigration> context
+            = await MigrationTestContext<ContainerMigration>.CreateAsync(
+                (client, db, container, logger) => new ContainerMigration(client, db, container, logger),
+                initialItems);
 
         IList<ExpandoObject> items
-            = await context.ContainerMigration.GetItems();
+            = await context.Migration.GetItems();
 
         string path = "InnerClass";
         string propertyName = "isProcessed";
         bool value = true;
 
         string query = $"SELECT * FROM c WHERE c.{path}.{propertyName} = {value.ToString().ToLower()}";
-        IList<ExpandoObject> currentItems = await context.ContainerMigration.GetItems(query);
+        IList<ExpandoObject> currentItems = await context.Migration.GetItems(query);
         Assert.Empty(currentItems);
 
         // Act
-        await context.ContainerMigration.AddPropertyToItems(items, path, propertyName, value);
+        await context.Migration.AddPropertyToItems(items, path, propertyName, value);
 
         // Assert
-        IList<ExpandoObject> updatedItems = await context.ContainerMigration.GetItems();
+        IList<ExpandoObject> updatedItems = await context.Migration.GetItems();
         foreach (ExpandoObject item in updatedItems)
         {
             IDictionary<string, object> metadata = GetNestedDictionary(item, path);
@@ -149,24 +155,26 @@ public sealed class ContainerContainerMigrationTests : IClassFixture<ContainerMi
         // Arrange
         List<ExpandoObject> initialItems = _fixture.InitialItems;
 
-        await using ContainerMigrationTestContext context
-            = await ContainerMigrationTestContext.CreateAsync(initialItems);
+        await using MigrationTestContext<ContainerMigration> context
+            = await MigrationTestContext<ContainerMigration>.CreateAsync(
+                (client, db, container, logger) => new ContainerMigration(client, db, container, logger),
+                initialItems);
 
-        IList<ExpandoObject> items = await context.ContainerMigration.GetItems();
+        IList<ExpandoObject> items = await context.Migration.GetItems();
         string propertyName = "tempField";
         object value = "removeMe";
 
-        await context.ContainerMigration.AddPropertyToItems(items, propertyName, value);
+        await context.Migration.AddPropertyToItems(items, propertyName, value);
 
         string query = $"SELECT * FROM c WHERE c.{propertyName} = '{value}'";
-        IList<ExpandoObject> currentItems = await context.ContainerMigration.GetItems(query);
+        IList<ExpandoObject> currentItems = await context.Migration.GetItems(query);
         Assert.NotEmpty(currentItems);
 
         // Act
-        await context.ContainerMigration.RemovePropertyFromItems(items, propertyName);
+        await context.Migration.RemovePropertyFromItems(items, propertyName);
 
         // Assert
-        IList<ExpandoObject> updatedItems = await context.ContainerMigration.GetItems();
+        IList<ExpandoObject> updatedItems = await context.Migration.GetItems();
         foreach (ExpandoObject item in updatedItems)
         {
             IDictionary<string, object> dict = ToDictionary(item);
@@ -180,25 +188,27 @@ public sealed class ContainerContainerMigrationTests : IClassFixture<ContainerMi
         // Arrange
         List<ExpandoObject> initialItems = _fixture.InitialItems;
 
-        await using ContainerMigrationTestContext context
-            = await ContainerMigrationTestContext.CreateAsync(initialItems);
+        await using MigrationTestContext<ContainerMigration> context
+            = await MigrationTestContext<ContainerMigration>.CreateAsync(
+                (client, db, container, logger) => new ContainerMigration(client, db, container, logger),
+                initialItems);
 
-        IList<ExpandoObject> items = await context.ContainerMigration.GetItems();
+        IList<ExpandoObject> items = await context.Migration.GetItems();
         string path = "InnerClass";
         string propertyName = "toRemove";
         string value = "value";
 
-        await context.ContainerMigration.AddPropertyToItems(items, path, propertyName, value);
+        await context.Migration.AddPropertyToItems(items, path, propertyName, value);
 
         string query = $"SELECT * FROM c WHERE c.{path}.{propertyName} = '{value}'";
-        IList<ExpandoObject> currentItems = await context.ContainerMigration.GetItems(query);
+        IList<ExpandoObject> currentItems = await context.Migration.GetItems(query);
         Assert.NotEmpty(currentItems);
 
         // Act
-        await context.ContainerMigration.RemovePropertyFromItems(items, path, propertyName);
+        await context.Migration.RemovePropertyFromItems(items, path, propertyName);
 
         // Assert
-        IList<ExpandoObject> updatedItems = await context.ContainerMigration.GetItems();
+        IList<ExpandoObject> updatedItems = await context.Migration.GetItems();
         foreach (ExpandoObject item in updatedItems)
         {
             IDictionary<string, object> metadata = GetNestedDictionary(item, path);

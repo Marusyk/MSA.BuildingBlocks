@@ -32,7 +32,8 @@ public class DatabaseMigration : BaseDatabaseMigration
     CosmosClient cosmosClient,
     string databaseId,
     string containerId,
-    ILogger<DatabaseMigration>? logger = default) : base(cosmosClient, databaseId, containerId, logger)
+    ILogger<DatabaseMigration>? logger = default)
+        : base(cosmosClient, databaseId, containerId, logger)
     {
     }
 
@@ -226,17 +227,16 @@ public class DatabaseMigration : BaseDatabaseMigration
     private async Task<double> CreateContainerAndUploadItems(string containerId, string partitionKey, IEnumerable<ExpandoObject> items)
     {
         ContainerResponse createContainerResponse = await _container.Database.CreateContainerIfNotExistsAsync(containerId, $"/{partitionKey}").ConfigureAwait(false);
+        _container = createContainerResponse.Container;
+
         double requestCharge = createContainerResponse.RequestCharge;
 
         foreach (ExpandoObject item in items)
         {
             PartitionKey key = new(item.FirstOrDefault(x => x.Key == partitionKey).Value?.ToString());
-            ResponseMessage createItemResponse = await createContainerResponse.Container.CreateItemStreamAsync(GetItemStream(item), key).ConfigureAwait(false);
+            ResponseMessage createItemResponse = await _container.CreateItemStreamAsync(GetItemStream(item), key).ConfigureAwait(false);
             requestCharge += createItemResponse.Headers.RequestCharge;
         }
-
-        _container = createContainerResponse.Container;
-        _container = await createContainerResponse.Container.ReadContainerAsync().ConfigureAwait(false);
 
         return requestCharge;
     }

@@ -4,11 +4,11 @@ using Randomizer = Bogus.Randomizer;
 
 namespace MSA.BuildingBlocks.CosmosDbMigration.Tests.Integration;
 
-public sealed class ContainerMigrationTestFixture
+public sealed class MigrationTestFixture
 {
     public List<ExpandoObject> InitialItems { get; }
 
-    public ContainerMigrationTestFixture()
+    public MigrationTestFixture()
     {
         InitialItems = GenerateFakeItems(10);
     }
@@ -33,6 +33,7 @@ public sealed class ContainerMigrationTestFixture
                 dict["MyProperty2"] = faker.Random.Int(1, 100);
                 dict["MyProperty3"] = faker.Random.Int(1, 100);
                 dict["CountryCode"] = faker.Address.CountryCode();
+                dict["PostalCode"] = faker.Address.ZipCode();
                 dict["InnerClass"] = new ExpandoObject();
 
                 return (ExpandoObject)item;
