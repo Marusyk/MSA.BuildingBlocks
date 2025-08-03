@@ -220,7 +220,7 @@ public class DatabaseMigrationTests(MigrationTestFixture fixture)
                 new[] {"/\"_etag\"/?" }, // This is the default cosmod db index
                 new List<List<string>>
                 {
-                    new() { "/c1/?", "/c2/?" }
+                    new() { "/c1", "/c2" }
                 }
             }
         };

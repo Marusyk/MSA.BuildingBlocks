@@ -29,13 +29,12 @@ public class DatabaseMigration : BaseDatabaseMigration
     /// <exception cref="ArgumentNullException">Thrown if cosmosClient is null.</exception>
     /// <exception cref="ArgumentException">Thrown if databaseId or containerId is null or empty.</exception>
     public DatabaseMigration(
-    CosmosClient cosmosClient,
-    string databaseId,
-    string containerId,
-    ILogger<DatabaseMigration>? logger = default)
-        : base(cosmosClient, databaseId, containerId, logger)
-    {
-    }
+        CosmosClient cosmosClient,
+        string databaseId,
+        string containerId,
+        ILogger<DatabaseMigration>? logger = default)
+            : base(cosmosClient, databaseId, containerId, logger)
+    { }
 
     /// <inheritdoc/>
     public override async Task CloneContainer(string containerId, string partitionKey)

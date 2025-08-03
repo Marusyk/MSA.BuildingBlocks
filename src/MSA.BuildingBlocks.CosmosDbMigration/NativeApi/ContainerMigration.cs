@@ -26,10 +26,10 @@ public class ContainerMigration : BaseContainerMigration
     /// <exception cref="ArgumentNullException">Thrown if cosmosClient is null.</exception>
     /// <exception cref="ArgumentException">Thrown if databaseId or containerId is null or empty.</exception>
     public ContainerMigration(
-    CosmosClient cosmosClient,
-    string databaseId,
-    string containerId,
-    ILogger<ContainerMigration>? logger = default) : base(cosmosClient, databaseId, containerId, logger)
+        CosmosClient cosmosClient,
+        string databaseId,
+        string containerId,
+        ILogger<ContainerMigration>? logger = default) : base(cosmosClient, databaseId, containerId, logger)
     { }
 
     /// <inheritdoc/>
@@ -145,7 +145,7 @@ public class ContainerMigration : BaseContainerMigration
         {
             if (!item.TryAdd(propertyName, value))
             {
-                throw new ArgumentException($"Cannot add property because it exists. Use update than.");
+                throw new ArgumentException($"Cannot add property because it exists. Use update than.", nameof(propertyName));
             }
 
             ResponseMessage response = await ReplaceItem(item);

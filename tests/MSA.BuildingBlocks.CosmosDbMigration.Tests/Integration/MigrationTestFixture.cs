@@ -15,7 +15,6 @@ public sealed class MigrationTestFixture
 
     private static List<ExpandoObject> GenerateFakeItems(int count)
     {
-        // Seed for deterministic tests
         Randomizer.Seed = new Random(1234);
 
         var faker = new Faker();
