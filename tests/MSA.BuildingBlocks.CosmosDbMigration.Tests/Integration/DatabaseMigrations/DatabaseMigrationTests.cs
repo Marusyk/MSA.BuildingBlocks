@@ -13,7 +13,7 @@ public class DatabaseMigrationTests(MigrationTestFixture fixture)
     private readonly MigrationTestFixture _fixture = fixture;
 
     [Fact]
-    public async Task CloneContainer_Shoud_Copy_All_Items_To_The_New_Container()
+    public async Task CloneContainer_Should_Copy_All_Items_To_The_New_Container()
     {
         // Arrange
         List<ExpandoObject> initialItems = _fixture.InitialItems;
@@ -30,7 +30,6 @@ public class DatabaseMigrationTests(MigrationTestFixture fixture)
 
         // Assert
         Container cloneContainer = context.Database.GetContainer(cloneContainerId);
-        var countQuery = new QueryDefinition("SELECT VALUE COUNT(1) FROM c");
         int clonedCount = await cloneContainer
             .GetItemLinqQueryable<int>(requestOptions: new QueryRequestOptions { MaxItemCount = 1 })
             .CountAsync(cancellationToken: TestContext.Current.CancellationToken);
@@ -71,9 +70,7 @@ public class DatabaseMigrationTests(MigrationTestFixture fixture)
         string newContainerId = $"TestContainer_new_{Guid.NewGuid()}";
 
         // Act
-        await context.Migration.CreateContainer(
-            newContainerId,
-            context.PartitionKey);
+        await context.Migration.CreateContainer(newContainerId, context.PartitionKey);
 
         // Assert
         Container newContainer = context.Database.GetContainer(newContainerId);
@@ -124,12 +121,12 @@ public class DatabaseMigrationTests(MigrationTestFixture fixture)
         Collection<Collection<CompositePath>> compositeIndexesOnReplace =
         [
             [
-                new CompositePath()
+                new CompositePath
                 {
                     Path = "/SomeField",
                     Order = CompositePathSortOrder.Ascending
                 },
-                new CompositePath()
+                new CompositePath
                 {
                     Path = "/id",
                     Order = CompositePathSortOrder.Ascending
@@ -153,10 +150,12 @@ public class DatabaseMigrationTests(MigrationTestFixture fixture)
         Assert.Equal(excludedIndexesOnReplace[0].Path, policy.ExcludedPaths[0].Path);
 
         Assert.Single(policy.CompositeIndexes);
-        Assert.Equal(compositeIndexesOnReplace[0][0].Path, policy.CompositeIndexes[0][0].Path);
-        Assert.Equal(compositeIndexesOnReplace[0][0].Order, policy.CompositeIndexes[0][0].Order);
-        Assert.Equal(compositeIndexesOnReplace[0][1].Path, policy.CompositeIndexes[0][1].Path);
-        Assert.Equal(compositeIndexesOnReplace[0][1].Order, policy.CompositeIndexes[0][1].Order);
+        int compositeIndexToValidate = 0;
+        for (int i = 0; i < policy.CompositeIndexes[compositeIndexToValidate].Count; i++)
+        {
+            Assert.Equal(compositeIndexesOnReplace[compositeIndexToValidate][i].Path, policy.CompositeIndexes[compositeIndexToValidate][i].Path);
+            Assert.Equal(compositeIndexesOnReplace[compositeIndexToValidate][i].Order, policy.CompositeIndexes[compositeIndexToValidate][i].Order);
+        }
     }
 
     public static TheoryData<
@@ -165,7 +164,8 @@ public class DatabaseMigrationTests(MigrationTestFixture fixture)
         Collection<Collection<CompositePath>>,
         string[],
         string[],
-        List<List<string>>> TestData { get; } = new()
+        List<List<string>>> TestData
+    { get; } = new()
         {
             // Case 1: only IncludedPaths
             {
@@ -250,20 +250,20 @@ public class DatabaseMigrationTests(MigrationTestFixture fixture)
         ContainerResponse containerResponse = await context.Container.ReadContainerAsync(cancellationToken: TestContext.Current.CancellationToken);
         IndexingPolicy policy = containerResponse.Resource.IndexingPolicy;
 
-        string[] actualIncluded = [..policy.IncludedPaths.Select(p => p.Path)];
+        string[] actualIncluded = [.. policy.IncludedPaths.Select(p => p.Path)];
 
         Assert.Equal(expectedIncludedPaths, actualIncluded);
 
         string[] actualExcluded = [.. policy.ExcludedPaths
-                                   .Select(p => p.Path)
-                                   .OrderBy(x => x)];
+            .Select(p => p.Path)
+            .OrderBy(x => x)];
 
         Assert.Equal(expectedExcludedPaths.OrderBy(x => x), actualExcluded);
 
         // Verify CompositeIndexes
         var actualComposite = policy.CompositeIndexes
-                                    .Select(c => c.Select(cp => cp.Path).ToList())
-                                    .ToList();
+            .Select(c => c.Select(cp => cp.Path).ToList())
+            .ToList();
 
         Assert.Equal(expectedCompositePaths.Count, actualComposite.Count);
         for (int i = 0; i < expectedCompositePaths.Count; i++)

@@ -8,7 +8,7 @@ public sealed class MigrationTestContext<TMigration> : IAsyncDisposable
 {
     private const string ConnectionString =
         "AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==";
-    private static string _databaseId;
+    private readonly string _databaseId;
     private readonly CosmosClient _client;
 
     public TMigration Migration { get; }
@@ -18,12 +18,14 @@ public sealed class MigrationTestContext<TMigration> : IAsyncDisposable
 
     private MigrationTestContext(
         CosmosClient client,
+        string databaseId,
         Database database,
         Container container,
         string partitionKey,
         TMigration migration)
     {
         _client = client;
+        _databaseId = databaseId;
         Database = database;
         Container = container;
         PartitionKey = partitionKey;
@@ -36,8 +38,8 @@ public sealed class MigrationTestContext<TMigration> : IAsyncDisposable
     {
 
         CosmosClient client = new(ConnectionString);
-        _databaseId = $"TestDb_{Guid.NewGuid()}";
-        Database database = await client.CreateDatabaseAsync(_databaseId);
+        var databaseId = $"TestDb_{Guid.NewGuid()}";
+        Database database = await client.CreateDatabaseAsync(databaseId);
 
         string containerId = $"TestContainer_{Guid.NewGuid()}";
         string partitionKey = "CountryCode";
@@ -45,12 +47,13 @@ public sealed class MigrationTestContext<TMigration> : IAsyncDisposable
         Container container = await database.CreateContainerAsync(containerProps);
 
         ILogger<TMigration> logger = new LoggerFactory().CreateLogger<TMigration>();
-        TMigration migration = migrationFactory(client, _databaseId, containerId, logger);
+        TMigration migration = migrationFactory(client, databaseId, containerId, logger);
 
-        await SeedDbIfDataProvided(seedItems, client, containerId);
+        await SeedDbIfDataProvided(seedItems, client, containerId, databaseId);
 
         return new MigrationTestContext<TMigration>(
             client,
+            databaseId,
             database,
             container,
             partitionKey,
@@ -66,15 +69,20 @@ public sealed class MigrationTestContext<TMigration> : IAsyncDisposable
     private static async Task SeedDbIfDataProvided(
         IList<ExpandoObject> seedItems,
         CosmosClient client,
-        string containerId)
+        string containerId,
+        string databaseId)
     {
         if (seedItems.Count > 0)
         {
-            Container c = client.GetContainer(_databaseId, containerId);
+            List<Task> upsertTasks = [];
+            Container container = client.GetContainer(databaseId, containerId);
+
             foreach (ExpandoObject item in seedItems)
             {
-                await c.UpsertItemAsync(item);
+                upsertTasks.Add(container.UpsertItemAsync(item));
             }
+
+            await Task.WhenAll(upsertTasks);
         }
     }
 }

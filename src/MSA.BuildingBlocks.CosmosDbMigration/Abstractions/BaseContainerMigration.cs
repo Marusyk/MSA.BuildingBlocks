@@ -53,7 +53,7 @@ public abstract class BaseContainerMigration
     /// <param name="containerId">The ID of the new target container.</param>
     /// <param name="databaseId">Optional ID of the database containing the new target container. If not provided, uses the current database.</param>
     /// <returns>An asynchronous task that completes the container switch.</returns>
-    public abstract Task SwitchToContainer(string containerId, string? databaseId = null);
+    public abstract ValueTask SwitchToContainer(string containerId, string? databaseId = null);
 
     /// <summary>
     /// Upserts a list of items into the target container.

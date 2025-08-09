@@ -33,7 +33,7 @@ public class DatabaseMigration : BaseDatabaseMigration
         string databaseId,
         string containerId,
         ILogger<DatabaseMigration>? logger = default)
-            : base(cosmosClient, databaseId, containerId, logger)
+        : base(cosmosClient, databaseId, containerId, logger)
     { }
 
     /// <inheritdoc/>
@@ -129,7 +129,7 @@ public class DatabaseMigration : BaseDatabaseMigration
     }
 
     /// <inheritdoc/>
-    public override Task SwitchToContainer(string containerId, string? databaseId = null)
+    public override ValueTask SwitchToContainer(string containerId, string? databaseId = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(containerId);
         databaseId ??= _container.Database.Id;
@@ -138,7 +138,7 @@ public class DatabaseMigration : BaseDatabaseMigration
 
         _logger.LogInformation("Switching to container {ContainerId} and database {DatabaseId} is successful", containerId, databaseId);
 
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     /// <inheritdoc/>

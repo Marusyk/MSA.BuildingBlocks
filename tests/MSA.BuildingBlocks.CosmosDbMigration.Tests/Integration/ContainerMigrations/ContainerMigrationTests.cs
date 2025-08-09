@@ -46,14 +46,14 @@ public sealed class ContainerMigrationTests(MigrationTestFixture fixture)
 
         foreach (ExpandoObject item in initialItems)
         {
-            IDictionary<string, object> originalDict = ToDictionary(item);
+            Dictionary<string, object> originalDict = item.ToDictionary();
             string id = originalDict["id"]?.ToString();
 
             Assert.Contains(actualItems, inserted =>
             {
-                IDictionary<string, object> insertedDict = ToDictionary(inserted);
+                Dictionary<string, object> insertedDict = inserted.ToDictionary();
                 return insertedDict["id"]?.ToString() == id;
-            });
+            }); 
         }
     }
 
@@ -108,7 +108,7 @@ public sealed class ContainerMigrationTests(MigrationTestFixture fixture)
         IList<ExpandoObject> updatedItems = await context.Migration.GetItems();
         foreach (ExpandoObject item in updatedItems)
         {
-            IDictionary<string, object> dict = ToDictionary(item);
+            Dictionary<string, object> dict = item.ToDictionary();
             Assert.True(dict.ContainsKey(propertyName));
             Assert.Equal(value, dict[propertyName]);
         }
@@ -125,8 +125,7 @@ public sealed class ContainerMigrationTests(MigrationTestFixture fixture)
                 (client, db, container, logger) => new ContainerMigration(client, db, container, logger),
                 initialItems);
 
-        IList<ExpandoObject> items
-            = await context.Migration.GetItems();
+        IList<ExpandoObject> items = await context.Migration.GetItems();
 
         string path = "InnerClass";
         string propertyName = "isProcessed";
@@ -143,7 +142,7 @@ public sealed class ContainerMigrationTests(MigrationTestFixture fixture)
         IList<ExpandoObject> updatedItems = await context.Migration.GetItems();
         foreach (ExpandoObject item in updatedItems)
         {
-            IDictionary<string, object> metadata = GetNestedDictionary(item, path);
+            Dictionary<string, object> metadata = GetNestedDictionary(item, path);
             Assert.True(metadata.ContainsKey(propertyName));
             Assert.Equal(value, metadata[propertyName]);
         }
@@ -177,7 +176,7 @@ public sealed class ContainerMigrationTests(MigrationTestFixture fixture)
         IList<ExpandoObject> updatedItems = await context.Migration.GetItems();
         foreach (ExpandoObject item in updatedItems)
         {
-            IDictionary<string, object> dict = ToDictionary(item);
+            Dictionary<string, object> dict = item.ToDictionary();
             Assert.False(dict.ContainsKey(propertyName));
         }
     }
@@ -211,20 +210,17 @@ public sealed class ContainerMigrationTests(MigrationTestFixture fixture)
         IList<ExpandoObject> updatedItems = await context.Migration.GetItems();
         foreach (ExpandoObject item in updatedItems)
         {
-            IDictionary<string, object> metadata = GetNestedDictionary(item, path);
+            Dictionary<string, object> metadata = GetNestedDictionary(item, path);
             Assert.False(metadata.ContainsKey(propertyName));
         }
     }
 
-    private static IDictionary<string, object> ToDictionary(ExpandoObject obj) =>
-        obj;
-
-    private static IDictionary<string, object> GetNestedDictionary(ExpandoObject root, string path)
+    private static Dictionary<string, object> GetNestedDictionary(ExpandoObject root, string path)
     {
-        IDictionary<string, object> rootDict = ToDictionary(root);
+        Dictionary<string, object> rootDict = root.ToDictionary();
         if (rootDict.TryGetValue(path, out object nested) && nested is ExpandoObject nestedObj)
         {
-            return ToDictionary(nestedObj);
+            return nestedObj.ToDictionary();
         }
 
         throw new InvalidOperationException($"Nested object '{path}' not found or invalid.");

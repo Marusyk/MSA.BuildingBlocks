@@ -29,7 +29,8 @@ public class ContainerMigration : BaseContainerMigration
         CosmosClient cosmosClient,
         string databaseId,
         string containerId,
-        ILogger<ContainerMigration>? logger = default) : base(cosmosClient, databaseId, containerId, logger)
+        ILogger<ContainerMigration>? logger = default)
+        : base(cosmosClient, databaseId, containerId, logger)
     { }
 
     /// <inheritdoc/>
@@ -52,7 +53,7 @@ public class ContainerMigration : BaseContainerMigration
     }
 
     /// <inheritdoc/>
-    public override Task SwitchToContainer(string containerId, string? databaseId = null)
+    public override ValueTask SwitchToContainer(string containerId, string? databaseId = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(containerId);
         databaseId ??= _container.Database.Id;
@@ -60,7 +61,7 @@ public class ContainerMigration : BaseContainerMigration
         _container = _cosmosClient.GetContainer(databaseId, containerId);
 
         _logger.LogInformation("Switching to container {ContainerId} and database {DatabaseId} is successful", containerId, databaseId);
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     /// <inheritdoc/>
@@ -145,7 +146,7 @@ public class ContainerMigration : BaseContainerMigration
         {
             if (!item.TryAdd(propertyName, value))
             {
-                throw new ArgumentException($"Cannot add property because it exists. Use update than.", nameof(propertyName));
+                throw new ArgumentException($"Cannot add property because it exists. Use update.", nameof(propertyName));
             }
 
             ResponseMessage response = await ReplaceItem(item);

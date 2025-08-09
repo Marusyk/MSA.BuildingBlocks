@@ -1,6 +1,5 @@
 using System.Dynamic;
 using Bogus;
-using Randomizer = Bogus.Randomizer;
 
 namespace MSA.BuildingBlocks.CosmosDbMigration.Tests.Integration;
 
@@ -15,26 +14,23 @@ public sealed class MigrationTestFixture
 
     private static List<ExpandoObject> GenerateFakeItems(int count)
     {
-        Randomizer.Seed = new Random(1234);
-
-        var faker = new Faker();
+        Faker faker = new();
 
         return Enumerable
             .Range(1, count)
             .Select(i =>
             {
                 dynamic item = new ExpandoObject();
-                var dict = (IDictionary<string, object>)item;
 
-                dict["id"] = Guid.NewGuid().ToString();
-                dict["SomeField"] = "SomeField";
-                dict["MyProperty"] = i;
-                dict["MyProperty2"] = faker.Random.Int(1, 100);
-                dict["MyProperty3"] = faker.Random.Int(1, 100);
-                dict["CountryCode"] = faker.Address.CountryCode();
-                dict["PostalCode"] = faker.Address.ZipCode();
-                dict["InnerClass"] = new ExpandoObject();
-
+                item.id = Guid.NewGuid().ToString();
+                item.SomeField = "SomeField";
+                item.MyProperty = i;
+                item.MyProperty2 = faker.Random.Int(1, 100);
+                item.MyProperty3 = faker.Random.Int(1, 100);
+                item.CountryCode = faker.Address.CountryCode();
+                item.PostalCode = faker.Address.ZipCode();
+                item.InnerClass = new ExpandoObject();
+                 
                 return (ExpandoObject)item;
             })
             .ToList();
