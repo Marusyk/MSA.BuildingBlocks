@@ -3,10 +3,15 @@ using Xunit;
 
 namespace MSA.BuildingBlocks.CosmosDbMigration.Tests.Integration.ContainerMigrations;
 
-public sealed class ContainerMigrationTests(MigrationTestFixture fixture)
+public sealed class ContainerMigrationTests
     : IClassFixture<MigrationTestFixture>
 {
-    private readonly MigrationTestFixture _fixture = fixture;
+    private readonly MigrationTestFixture _fixture;
+
+    public ContainerMigrationTests(MigrationTestFixture fixture)
+    {
+        _fixture = fixture;
+    }
 
     [Fact]
     public async Task GetItems_Should_Return_Initially_Inserted_Items()

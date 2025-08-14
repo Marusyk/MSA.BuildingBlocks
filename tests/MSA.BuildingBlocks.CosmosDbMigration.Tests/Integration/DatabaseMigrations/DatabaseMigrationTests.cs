@@ -7,10 +7,15 @@ using Xunit;
 
 namespace MSA.BuildingBlocks.CosmosDbMigration.Tests.Integration.DatabaseMigrations;
 
-public class DatabaseMigrationTests(MigrationTestFixture fixture)
+public class DatabaseMigrationTests
     : IClassFixture<MigrationTestFixture>
 {
-    private readonly MigrationTestFixture _fixture = fixture;
+    private readonly MigrationTestFixture _fixture;
+
+    public DatabaseMigrationTests(MigrationTestFixture fixture)
+    {
+        _fixture = fixture;
+    }
 
     [Fact]
     public async Task CloneContainer_Should_Copy_All_Items_To_The_New_Container()
