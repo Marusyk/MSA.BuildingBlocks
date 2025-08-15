@@ -1,15 +1,31 @@
 using System.Dynamic;
 using Bogus;
+using Microsoft.Azure.Cosmos;
+using Xunit;
 
 namespace MSA.BuildingBlocks.CosmosDbMigration.Tests.Integration;
 
-public sealed class MigrationTestFixture
+[CollectionDefinition("Migration collection")]
+public class MigrationCollection : ICollectionFixture<MigrationTestCollectionFixture>
 {
-    public List<ExpandoObject> InitialItems { get; }
+}
 
-    public MigrationTestFixture()
+public sealed class MigrationTestCollectionFixture : IAsyncLifetime
+{
+    public List<ExpandoObject> InitialItems { get; private set; }
+    public CosmosClient CosmosClient { get; private set; }
+
+    public ValueTask InitializeAsync()
     {
+        CosmosClient = new CosmosClient("AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
         InitialItems = GenerateFakeItems(10);
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        CosmosClient.Dispose();
+        return ValueTask.CompletedTask;
     }
 
     private static List<ExpandoObject> GenerateFakeItems(int count)

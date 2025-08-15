@@ -6,8 +6,6 @@ namespace MSA.BuildingBlocks.CosmosDbMigration.Tests.Integration;
 
 public sealed class MigrationTestContext<TMigration> : IAsyncDisposable
 {
-    private const string ConnectionString =
-        "AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==";
     private readonly string _databaseId;
     private readonly CosmosClient _client;
 
@@ -34,11 +32,10 @@ public sealed class MigrationTestContext<TMigration> : IAsyncDisposable
 
     public static async Task<MigrationTestContext<TMigration>> CreateAsync(
         Func<CosmosClient, string, string, ILogger<TMigration>, TMigration> migrationFactory,
+        CosmosClient client,
         IList<ExpandoObject> seedItems)
     {
-
-        CosmosClient client = new(ConnectionString);
-        var databaseId = $"TestDb_{Guid.NewGuid()}";
+        string databaseId = $"TestDb_{Guid.NewGuid()}";
         Database database = await client.CreateDatabaseAsync(databaseId);
 
         string containerId = $"TestContainer_{Guid.NewGuid()}";
@@ -63,7 +60,6 @@ public sealed class MigrationTestContext<TMigration> : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         await _client.GetDatabase(_databaseId).DeleteAsync();
-        _client.Dispose();
     }
 
     private static async Task SeedDbIfDataProvided(
@@ -85,4 +81,5 @@ public sealed class MigrationTestContext<TMigration> : IAsyncDisposable
             await Task.WhenAll(upsertTasks);
         }
     }
+
 }

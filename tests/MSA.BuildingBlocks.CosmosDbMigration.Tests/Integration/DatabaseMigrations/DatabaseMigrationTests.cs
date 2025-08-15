@@ -7,12 +7,12 @@ using Xunit;
 
 namespace MSA.BuildingBlocks.CosmosDbMigration.Tests.Integration.DatabaseMigrations;
 
+[Collection("Migration collection")]
 public class DatabaseMigrationTests
-    : IClassFixture<MigrationTestFixture>
 {
-    private readonly MigrationTestFixture _fixture;
+    private readonly MigrationTestCollectionFixture _fixture;
 
-    public DatabaseMigrationTests(MigrationTestFixture fixture)
+    public DatabaseMigrationTests(MigrationTestCollectionFixture fixture)
     {
         _fixture = fixture;
     }
@@ -26,6 +26,7 @@ public class DatabaseMigrationTests
         await using MigrationTestContext<DatabaseMigration> context
             = await MigrationTestContext<DatabaseMigration>.CreateAsync(
                 (client, db, container, logger) => new DatabaseMigration(client, db, container, logger),
+                _fixture.CosmosClient,
                 initialItems);
 
         string cloneContainerId = $"TestContainer_clone_{Guid.NewGuid()}";
@@ -46,9 +47,10 @@ public class DatabaseMigrationTests
     public async Task DeleteContainer_Should_Delete_The_Current_Container()
     {
         // Arrange
-        await using MigrationTestContext<DatabaseMigration> context = await MigrationTestContext<DatabaseMigration>
-            .CreateAsync(
+        await using MigrationTestContext<DatabaseMigration> context
+            = await MigrationTestContext<DatabaseMigration>.CreateAsync(
                 (client, db, container, logger) => new DatabaseMigration(client, db, container, logger),
+                _fixture.CosmosClient,
                 seedItems: []);
 
         // Act
@@ -67,9 +69,10 @@ public class DatabaseMigrationTests
     public async Task CreateContainer_Should_Create_A_New_Container_If_Not_Exists()
     {
         // Arrange
-        await using MigrationTestContext<DatabaseMigration> context = await MigrationTestContext<DatabaseMigration>
-            .CreateAsync(
+        await using MigrationTestContext<DatabaseMigration> context
+            = await MigrationTestContext<DatabaseMigration>.CreateAsync(
                 (client, db, container, logger) => new DatabaseMigration(client, db, container, logger),
+                _fixture.CosmosClient,
                 seedItems: []);
 
         string newContainerId = $"TestContainer_new_{Guid.NewGuid()}";
@@ -89,9 +92,9 @@ public class DatabaseMigrationTests
     {
         // Arrange
         List<ExpandoObject> initialItems = _fixture.InitialItems;
-        await using MigrationTestContext<DatabaseMigration> context = await MigrationTestContext<DatabaseMigration>
-            .CreateAsync(
+        await using MigrationTestContext<DatabaseMigration> context = await MigrationTestContext<DatabaseMigration>.CreateAsync(
                 (client, db, container, logger) => new DatabaseMigration(client, db, container, logger),
+                _fixture.CosmosClient,
                 seedItems: initialItems);
 
         string newPartitionKey = "PostalCode";
@@ -114,9 +117,9 @@ public class DatabaseMigrationTests
     public async Task ReplaceIndexingPolicy_Should_Overwrite_All_Provided_Indexes()
     {
         // Arrange
-        await using MigrationTestContext<DatabaseMigration> context = await MigrationTestContext<DatabaseMigration>
-            .CreateAsync(
+        await using MigrationTestContext<DatabaseMigration> context = await MigrationTestContext<DatabaseMigration>.CreateAsync(
                 (client, db, container, logger) => new DatabaseMigration(client, db, container, logger),
+                _fixture.CosmosClient,
                 seedItems: []);
 
         Collection<IncludedPath> includedIndexesOnReplace = [new() { Path = "/SomeField/?" }];
@@ -241,8 +244,10 @@ public class DatabaseMigrationTests
             List<List<string>> expectedCompositePaths)
 
     {
-        await using MigrationTestContext<DatabaseMigration> context = await MigrationTestContext<DatabaseMigration>.CreateAsync(
+        await using MigrationTestContext<DatabaseMigration> context
+            = await MigrationTestContext<DatabaseMigration>.CreateAsync(
                 (client, db, container, logger) => new DatabaseMigration(client, db, container, logger),
+                _fixture.CosmosClient,
                 seedItems: []);
 
         // Act

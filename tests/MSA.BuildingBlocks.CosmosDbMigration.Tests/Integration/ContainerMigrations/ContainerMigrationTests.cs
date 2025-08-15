@@ -3,12 +3,12 @@ using Xunit;
 
 namespace MSA.BuildingBlocks.CosmosDbMigration.Tests.Integration.ContainerMigrations;
 
+[Collection("Migration collection")]
 public sealed class ContainerMigrationTests
-    : IClassFixture<MigrationTestFixture>
 {
-    private readonly MigrationTestFixture _fixture;
+    private readonly MigrationTestCollectionFixture _fixture;
 
-    public ContainerMigrationTests(MigrationTestFixture fixture)
+    public ContainerMigrationTests(MigrationTestCollectionFixture fixture)
     {
         _fixture = fixture;
     }
@@ -22,7 +22,8 @@ public sealed class ContainerMigrationTests
         await using MigrationTestContext<ContainerMigration> context
             = await MigrationTestContext<ContainerMigration>.CreateAsync(
                 (client, db, container, logger) => new ContainerMigration(client, db, container, logger),
-                initialItems);
+                _fixture.CosmosClient,
+                seedItems: initialItems);
 
         // Act
         IList<ExpandoObject> actualItems = await context.Migration.GetItems();
@@ -40,6 +41,7 @@ public sealed class ContainerMigrationTests
         await using MigrationTestContext<ContainerMigration> context
             = await MigrationTestContext<ContainerMigration>.CreateAsync(
                 (client, db, container, logger) => new ContainerMigration(client, db, container, logger),
+                _fixture.CosmosClient,
                 seedItems: []);
 
         // Act
@@ -58,7 +60,7 @@ public sealed class ContainerMigrationTests
             {
                 Dictionary<string, object> insertedDict = inserted.ToDictionary();
                 return insertedDict["id"]?.ToString() == id;
-            }); 
+            });
         }
     }
 
@@ -66,12 +68,11 @@ public sealed class ContainerMigrationTests
     public async Task RemoveItemsByQuery_Should_Delete_All_Matching_Items()
     {
         // Arrange
-        List<ExpandoObject> initialItems = _fixture.InitialItems;
-
         await using MigrationTestContext<ContainerMigration> context
             = await MigrationTestContext<ContainerMigration>.CreateAsync(
                 (client, db, container, logger) => new ContainerMigration(client, db, container, logger),
-                initialItems);
+                _fixture.CosmosClient,
+                seedItems: _fixture.InitialItems);
 
         string query = "SELECT * FROM c WHERE c.SomeField = 'SomeField'";
 
@@ -90,12 +91,11 @@ public sealed class ContainerMigrationTests
     public async Task AddPropertyToItems_Should_Add_Property_To_The_Root()
     {
         // Arrange
-        List<ExpandoObject> initialItems = _fixture.InitialItems;
-
         await using MigrationTestContext<ContainerMigration> context
             = await MigrationTestContext<ContainerMigration>.CreateAsync(
                 (client, db, container, logger) => new ContainerMigration(client, db, container, logger),
-                initialItems);
+                _fixture.CosmosClient,
+                seedItems: _fixture.InitialItems);
 
         string propertyName = "status";
         string value = "active";
@@ -123,12 +123,11 @@ public sealed class ContainerMigrationTests
     public async Task AddPropertyToItems_Should_Add_Nested_Property_To_The_Existing_Root_Property()
     {
         // Arrange
-        List<ExpandoObject> initialItems = _fixture.InitialItems;
-
         await using MigrationTestContext<ContainerMigration> context
             = await MigrationTestContext<ContainerMigration>.CreateAsync(
                 (client, db, container, logger) => new ContainerMigration(client, db, container, logger),
-                initialItems);
+                _fixture.CosmosClient,
+                seedItems: _fixture.InitialItems);
 
         IList<ExpandoObject> items = await context.Migration.GetItems();
 
@@ -157,12 +156,11 @@ public sealed class ContainerMigrationTests
     public async Task RemovePropertyFromItems_Should_Remove_Root_Property()
     {
         // Arrange
-        List<ExpandoObject> initialItems = _fixture.InitialItems;
-
         await using MigrationTestContext<ContainerMigration> context
             = await MigrationTestContext<ContainerMigration>.CreateAsync(
                 (client, db, container, logger) => new ContainerMigration(client, db, container, logger),
-                initialItems);
+                _fixture.CosmosClient,
+                seedItems: _fixture.InitialItems);
 
         IList<ExpandoObject> items = await context.Migration.GetItems();
         string propertyName = "tempField";
@@ -190,12 +188,11 @@ public sealed class ContainerMigrationTests
     public async Task RemovePropertyFromItems_Should_Remove_Nested_Property_From_The_Existing_Root_Property()
     {
         // Arrange
-        List<ExpandoObject> initialItems = _fixture.InitialItems;
-
         await using MigrationTestContext<ContainerMigration> context
             = await MigrationTestContext<ContainerMigration>.CreateAsync(
                 (client, db, container, logger) => new ContainerMigration(client, db, container, logger),
-                initialItems);
+                _fixture.CosmosClient,
+                seedItems: _fixture.InitialItems);
 
         IList<ExpandoObject> items = await context.Migration.GetItems();
         string path = "InnerClass";
