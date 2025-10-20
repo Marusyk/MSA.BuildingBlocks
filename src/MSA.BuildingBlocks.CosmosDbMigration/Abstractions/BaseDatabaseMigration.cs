@@ -15,7 +15,6 @@ public abstract class BaseDatabaseMigration
 {
     protected CosmosClient _cosmosClient;
     protected Container _container;
-    protected ContainerProperties _containerProperties;
     protected ILogger<BaseDatabaseMigration> _logger;
 
     /// <summary>
@@ -39,7 +38,6 @@ public abstract class BaseDatabaseMigration
 
         _cosmosClient = cosmosClient;
         _container = cosmosClient.GetContainer(databaseId, containerId);
-        _containerProperties = _container.ReadContainerAsync().GetAwaiter().GetResult();
         _logger = logger ?? new LoggerFactory().CreateLogger<BaseDatabaseMigration>();
     }
 
@@ -105,7 +103,7 @@ public abstract class BaseDatabaseMigration
     /// <param name="databaseId">Optional ID of the database containing the new target container. If not provided, uses the current database.</param>
     /// <returns>An asynchronous task that completes the container switch.</returns>
     /// <exception cref="ArgumentNullException">Thrown if containerId is null or empty.</exception>
-    public abstract Task SwitchToContainer(string containerId, string? databaseId = null);
+    public abstract ValueTask SwitchToContainer(string containerId, string? databaseId = null);
 
     protected abstract Task<(IList<ExpandoObject>, double)> GetItems(string query = "SELECT * FROM c");
 }
